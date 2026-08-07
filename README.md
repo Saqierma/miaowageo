@@ -181,6 +181,39 @@ Google PageSpeed Insights 移动端性能分、CrUX 真实用户字段数据、�
 >
 > 这个站的老板从浏览器里看，网站一切正常。
 
+### 原则四：**每一项都用大白话讲清楚「这是什么、怎么改」**
+
+前三条讲的是**不说错话**。这一条讲的是**说了有用的话**。
+
+报告一开始只写观测事实：「meta description 共 51 个字符」「页面未声明 hreflang」。
+对懂行的人够了，对这个工具的真实用户——第一次听说 GEO 的中小企业老板——等于什么都没说。
+他看到一屏「需改进」，唯一能得到的信息是「我好像有问题」。
+
+所以每一项检查都配了三段话，**不达标的项默认展开**：
+
+| | |
+| --- | --- |
+| **是什么** | 用他知道的词解释，不用行话 |
+| **不达标会怎样** | 后果要具体，不能只说「不利于 SEO」 |
+| **怎么改** | 要能照着做，或至少知道该找谁、说什么 |
+
+报告顶部还有一份**按严重程度排序的待办清单**。排序依据是「不改的后果有多严重」，
+不是「改起来有多容易」：`noindex` 排第一，因为它是唯一一个「一行配置让整页从所有索引里
+消失」的项；静态可读性第二，因为它让 AI 一个字都读不到。用户多半只认真看前三条，
+那三条必须是最要紧的。
+
+几条刻意的克制，都由测试守着：
+
+- **「怎么改」里不承诺结果。**「加上 canonical 就能被 AI 引用」是假话。
+  能说的只有「不加，这个环节一定过不去」。
+- **要找开发的明说要找开发**（静态可读性、可访问性树、CLS）。
+  让老板以为「改一下就好」，他去找建站公司时说不清要什么。
+- **单语言站的 hreflang 明说「对你不适用」。** 这项判需改进，但只有一种语言的站
+  不做才是对的——不说清楚，等于让做对了的人去修一个不存在的问题。
+- **`llms.txt` 如实说「Google 已明确不使用」。** 大量 GEO 文章把它吹成必做项。
+
+这一层在 [`src/explain.mjs`](src/explain.mjs)，34 项检查的文案全在里面，纯数据、零依赖。
+
 ---
 
 ## 六、技术架构（本仓库开源的部分）
@@ -213,9 +246,9 @@ Google PageSpeed Insights 移动端性能分、CrUX 真实用户字段数据、�
 
 Worker 用自签证书、按 IP 被调用，公共 CA 体系在这里失去意义。改用证书指纹固定回答唯一真正重要的问题：**我连上的这台，是不是我认识的那台？**
 
-### 309 个测试，每一条防线都被变异验证过
+### 324 个测试，每一条防线都被变异验证过
 
-`npm test` 跑 309 个测试。更要紧的是：**每一条重要防线都做过变异测试**——把防御代码删掉，确认真的有测试变红。
+`npm test` 跑 324 个测试。更要紧的是：**每一条重要防线都做过变异测试**——把防御代码删掉，确认真的有测试变红。
 
 一个不会变红的测试，是比没有测试更危险的东西：它让人以为那里被守着。
 
@@ -223,7 +256,7 @@ Worker 用自签证书、按 IP 被调用，公共 CA 体系在这里失去意�
 git clone https://github.com/Saqierma/miaowageo.git
 cd miaowageo
 npm install        # 只装 lighthouse
-npm test           # 309 个测试
+npm test           # 324 个测试
 ```
 
 需要 Node.js >= 22.13.0。部署见 [`deploy/README.md`](deploy/README.md)。
@@ -453,6 +486,41 @@ Collapsing all three into one grey "not measured" leaves the reader unable to an
 >
 > From the owner's browser, that site looked completely fine.
 
+### Principle 4: **every check is explained in plain language — what it is, how to fix it**
+
+The first three are about **not saying anything false**. This one is about **saying something useful**.
+
+The report used to state observations only: "meta description is 51 characters", "no hreflang declared".
+Enough for a specialist; meaningless to this tool's actual user — an SME owner hearing "GEO" for the
+first time. Faced with a screen of "needs improvement", the only thing he learns is *something is wrong*.
+
+So every check now carries three lines, **expanded by default for anything that failed**:
+
+| | |
+| --- | --- |
+| **What it is** | Explained in words he already knows, no jargon |
+| **What it costs you** | Concrete consequences, not "bad for SEO" |
+| **How to fix it** | Actionable — or at minimum, who to ask and what to ask for |
+
+The top of the report carries a **to-do list ordered by severity** — by how bad it is *not* to fix,
+not by how easy it is to fix. `noindex` ranks first: it is the only single line of configuration that
+removes a page from every index at once. Static readability second: it leaves the AI with nothing to read.
+Most people only read the first three items, so those three had better be the right ones.
+
+Several deliberate restraints, each guarded by a test:
+
+- **No promised outcomes.** "Add canonical and you'll get cited by AI" is a lie. The only honest
+  statement is "without it, this particular gate stays shut."
+- **When a developer is needed, say so** (static readability, accessibility tree, CLS). Letting an
+  owner believe it's a quick toggle leaves him unable to brief his agency.
+- **hreflang explicitly says "not applicable to you" for single-language sites.** It's flagged as
+  needs-improvement, but for a one-language site *not* having it is correct — failing to say so sends
+  someone to fix a problem that doesn't exist.
+- **`llms.txt` honestly states that Google has said it does not use it**, despite a great deal of
+  GEO writing selling it as mandatory.
+
+This layer lives in [`src/explain.mjs`](src/explain.mjs) — all 34 explanations, pure data, zero dependencies.
+
 ---
 
 ## 6. Architecture (what this repository contains)
@@ -485,9 +553,9 @@ Anyone can submit any URL and we will genuinely connect to it. The defences are 
 
 The worker uses a self-signed certificate and is called by IP, which makes public PKI meaningless here. Fingerprint pinning answers the only question that matters: **is the machine I just connected to the machine I know?**
 
-### 309 tests, and every defence has been mutation-verified
+### 324 tests, and every defence has been mutation-verified
 
-`npm test` runs 309 tests. More importantly, **every significant defence has been mutation-tested** — the defensive code is deleted and we confirm a test actually turns red.
+`npm test` runs 324 tests. More importantly, **every significant defence has been mutation-tested** — the defensive code is deleted and we confirm a test actually turns red.
 
 A test that cannot turn red is more dangerous than no test at all: it makes people believe something is guarded.
 
@@ -495,7 +563,7 @@ A test that cannot turn red is more dangerous than no test at all: it makes peop
 git clone https://github.com/Saqierma/miaowageo.git
 cd miaowageo
 npm install        # installs lighthouse only
-npm test           # 309 tests
+npm test           # 324 tests
 ```
 
 Requires Node.js >= 22.13.0. See [`deploy/README.md`](deploy/README.md).
