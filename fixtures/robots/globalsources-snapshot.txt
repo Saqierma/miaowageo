@@ -1,0 +1,222 @@
+# Task 11 回归 fixture：curl -s https://www.globalsources.com/robots.txt
+# 抓取时间 2026-08-06。这是一份快照，往后不会再更新——
+# 回归测试钉的是「解析器怎么判定这份 2026-08-06 的配置」，不是「对方现网现在长什么样」。
+# `#` 是 robots.txt 规范里的注释符，parseRobots() 已经逐行剥离，不影响下面的分组解析。
+User-agent: *
+Disallow: *{*
+Disallow: *.do?*
+Disallow: *undefine*
+Disallow: *productDetail*
+Disallow: /sensors/
+Disallow: /si/
+Disallow: /gsol/
+Disallow: /wholesale/
+Disallow: /factory/
+Disallow: /_nuxt/
+Disallow: /fonts/
+Disallow: /preview/
+Disallow: /api/*/product-shipping-cost-desc
+Disallow: /api/*/comment/
+Disallow: /api/*/chat/
+Disallow: /api/*/coupon/
+Disallow: /api/*/agg-search/*/popup/
+Disallow: /api/*/get/md/routes 
+Disallow: /api/*/alert-product/
+Disallow: /api/*/advert/*/top-ad
+Disallow: /search?keywords=%
+Disallow: /member/
+Disallow: /login
+Disallow: /buyerCenter/
+
+
+User-agent: AdsBot-Google
+User-agent: AdsBot-Google-Mobile
+Disallow: *{*
+Disallow: *.do?*
+Disallow: *undefine*
+Disallow: *productDetail*
+Disallow: /sensors/
+Disallow: /si/
+Disallow: /gsol/
+Disallow: /wholesale/
+Disallow: /factory/
+Disallow: /_nuxt/
+Disallow: /fonts/
+Disallow: /preview/
+Disallow: /api/*/product-shipping-cost-desc
+Disallow: /api/*/comment/
+Disallow: /api/*/chat/
+Disallow: /api/*/coupon/
+Disallow: /api/*/agg-search/*/popup/
+Disallow: /api/*/get/md/routes 
+Disallow: /api/*/alert-product/
+Disallow: /api/*/advert/*/top-ad
+Disallow: /search?keywords=%
+Disallow: /member/
+Disallow: /login
+Disallow: /buyerCenter/
+
+
+User-agent: 80bot
+Disallow: /
+
+User-agent: YahooSeeker 
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: voyager
+Crawl-delay: 10 
+
+User-agent: bingbot
+Crawl-delay: 20
+
+User-agent: Applebot
+Crawl-delay: 20
+
+User-agent: Baiduspider
+Allow: /$
+Allow: /category/
+Allow: /manufacturers/
+Allow: /china-suppliers/
+Allow: /knowledge/
+Allow: /helpCenter/
+Allow: /STM/
+Allow: /site/
+Allow: /trade-fair/
+Allow: /tradeShows/
+Allow: /*p.htm
+Allow: /*f.htm
+Allow: /robots.txt
+Allow: /*.xml*
+Allow: /*/$
+Disallow: /
+Crawl-delay: 20
+
+User-agent: meta-externalagent
+User-agent: meta-webindexer
+Allow: /$
+Allow: /category/
+Allow: /knowledge/
+Allow: /helpCenter/
+Allow: /STM/
+Allow: /site/
+Allow: /trade-fair/
+Allow: /*/company-profile
+Allow: /robots.txt
+Allow: /*.xml*
+Allow: /*/$
+Disallow: /
+Crawl-delay: 20
+
+User-agent: meta-externalads
+User-agent: facebookexternalhit
+Disallow: /api/
+Disallow: /fonts/
+Disallow: /*?*
+Crawl-delay: 10
+
+
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+Allow: /$
+Allow: /category/
+Allow: /knowledge/
+Allow: /helpCenter/
+Allow: /STM/
+Allow: /site/
+Allow: /trade-fair/
+Allow: /*/company-profile
+Allow: /*p.htm
+Allow: /robots.txt
+Allow: /*.xml*
+Allow: /*/$
+Disallow: /
+Crawl-delay: 20
+
+User-agent: Google-Extended
+User-agent: Gemini-Deep-Research
+Allow: /$
+Allow: /category/
+Allow: /knowledge/
+Allow: /helpCenter/
+Allow: /STM/
+Allow: /site/
+Allow: /trade-fair/
+Allow: /*/company-profile
+Allow: /*p.htm
+Allow: /robots.txt
+Allow: /*.xml*
+Allow: /*/$
+Disallow: /
+Crawl-delay: 20
+
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+Allow: /$
+Allow: /knowledge/
+Allow: /helpCenter/
+Allow: /STM/
+Allow: /site/
+Allow: /trade-fair/
+Allow: /*/company-profile
+Allow: /robots.txt
+Allow: /*.xml*
+Allow: /*/$
+Disallow: /
+Crawl-delay: 10
+
+User-agent: ClaudeBot
+User-agent: Claude-User
+Allow: /$
+Allow: /category/
+Allow: /knowledge/
+Allow: /helpCenter/
+Allow: /STM/
+Allow: /site/
+Allow: /trade-fair/
+Allow: /*/company-profile
+Allow: /robots.txt
+Allow: /*.xml*
+Allow: /*/$
+Disallow: /
+Crawl-delay: 20
+
+User-agent: GrokBot
+Allow: /$
+Allow: /category/
+Allow: /knowledge/
+Allow: /helpCenter/
+Allow: /STM/
+Allow: /site/
+Allow: /trade-fair/
+Allow: /*/company-profile
+Allow: /robots.txt
+Allow: /*.xml*
+Allow: /*/$
+Disallow: /
+Crawl-delay: 20
+
+User-agent: DeepSeekBot
+Allow: /$
+Allow: /category/
+Allow: /knowledge/
+Allow: /helpCenter/
+Allow: /STM/
+Allow: /site/
+Allow: /trade-fair/
+Allow: /*/company-profile
+Allow: /robots.txt
+Allow: /*.xml*
+Allow: /*/$
+Disallow: /
+Crawl-delay: 20
+
+
+
+

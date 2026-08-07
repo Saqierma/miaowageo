@@ -1,0 +1,15 @@
+[Unit]
+Description=Miaowa GEO site-audit worker inbound restriction (nftables)
+After=network-online.target
+Wants=network-online.target
+# 防火墙必须先于 Worker 起来，否则每次重启都有一个「服务已监听、限制未加载」
+# 的窗口。
+Before=miaowa-site-audit.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/nft -f /etc/nftables-miaowa-audit.conf
+
+[Install]
+WantedBy=multi-user.target

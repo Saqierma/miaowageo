@@ -1,0 +1,147 @@
+# miaowa-site-audit.service
+#
+# 妙蛙 GEO 站点检测 Worker（轻检查 + 深检查，src/server.mjs）。
+#
+# 这份单元里的每一个数值都来自真实压测，不是拍脑袋的默认值。
+# 把它们改小之前，请先读对应那段注释——多数上限在被突破时
+# **不会报「超限」，而是伪装成别的故障**。
+
+[Unit]
+Description=Miaowa GEO public site-audit worker (light + deep)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=miaowageo
+Group=miaowageo
+WorkingDirectory=/opt/miaowa-site-audit/current
+Environment=NODE_ENV=production
+Environment=TZ=UTC
+Environment=PORT=4319
+
+# 深检查开关没有默认值，必须显式写 "1" 或 "0"。
+# 理由见 src/server.mjs 的 assertDeepCheckConfig()：一个「默认关闭」的深检查，
+# 在运维忘了配置时的表现是「服务正常启动、深检查静默不可用」，
+# 而那与「深检查坏了」在外部完全无法区分。
+Environment=MIAOWA_AUDIT_NODE_PATH=/opt/node22/bin/node
+Environment=MIAOWA_AUDIT_CHROME_PATH=/opt/chrome/chrome-linux64/chrome
+Environment=MIAOWA_AUDIT_LIGHTHOUSE_BIN=/opt/miaowa-site-audit/current/node_modules/.bin/lighthouse
+
+# ---------------------------------------------------------------------------
+# 代理环境变量必须显式清空为空字符串——这不是卫生习惯，是启动前提。
+#
+# 检测 Worker 的接口是匿名公开的：任何人都能提交任意 URL。如果进程环境里
+# 存在 HTTP_PROXY / HTTPS_PROXY，出网请求会绕过 src/fetchers/net-guard.mjs
+# 的地址判定（判定的是解析结果，而经代理时真正的连接由代理发起），
+# 整条 SSRF 防线等于不存在。
+#
+# systemd 继承的环境未必干净——运维可能在 /etc/environment 或某个全局
+# EnvironmentFile 里为**别的服务**配过代理。下面四行把四种大小写形态
+# 全部显式置空，保证不管外部怎么配，本服务进程里看到的永远是空字符串。
+# 否则 src/fetchers/net-guard.mjs 的 assertNoProxyEnv() 会拒绝启动——
+# 那是设计如此：宁可起不来，也不带着一条失效的防线对外服务。
+Environment=HTTP_PROXY=
+Environment=HTTPS_PROXY=
+Environment=http_proxy=
+Environment=https_proxy=
+
+# ---------------------------------------------------------------------------
+# UV_THREADPOOL_SIZE：dns.lookup（node:dns/promises）是 libuv 线程池上的
+# 阻塞系统调用（getaddrinfo），默认线程池只有 4 个线程，且与 fs、zlib、
+# crypto.pbkdf2 等共享同一个池。
+#
+# net-guard 的 resolveAndGuard() 对每一次 safeFetch、每一跳重定向都重新解析
+# 一次域名，**故意不做缓存**（缓存会给 DNS rebinding 留窗口）。
+# 请求池 20 深，每个请求要发 6 次独立的 safeFetch（robots.txt、页面、
+# sitemap.xml、llms.txt、agents.md、/.well-known/ucp），后五个并行发起。
+# worst case 同一时刻可能有 20 × 6 = 120 次 dns.lookup 排队。
+#
+# 默认 4 个线程时，只要少数几个目标站的权威 DNS 响应慢（远没到超时，只是慢），
+# 线程池就会被占满，其余**所有**请求的域名解析都要排队等——包括与那些慢站
+# 毫无关系的检测请求。这就是「慢权威服务器拖累全局」的头部阻塞。
+# 128 覆盖 worst case 还留余量；空闲线程只占线程栈的虚拟地址空间，
+# 不是常驻堆内存，对下面 MemoryMax 的实际影响可以忽略。
+Environment=UV_THREADPOOL_SIZE=128
+
+# 敏感值（MIAOWA_AUDIT_WORKER_TOKEN、GOOGLE_PSI_API_KEY、
+# MIAOWA_AUDIT_OWN_PUBLIC_IP）放在这个文件里，**不写进本单元、不进版本库**。
+# 缺失时 startServer() 同步抛错拒绝启动（src/server.mjs）。
+EnvironmentFile=/etc/miaowa-site-audit/audit-worker.env
+
+# ---------------------------------------------------------------------------
+# 必须指向独立安装的 Node 22，不要用 /usr/bin/node。
+#
+# package.json 声明 engines.node >= 22.13.0：safe-fetch 的连接钉死、
+# TextDecoder 的 full-icu 多字节解码都按 Node 22 的行为写的。
+# 独立解压到 /opt/node22（校验 sha256）只由本单元引用，
+# 系统 Node 原样不动——机器上通常还有别的服务在用它，整机升级会波及它们。
+ExecStart=/opt/node22/bin/node /opt/miaowa-site-audit/current/src/server.mjs
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+KillSignal=SIGINT
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+# Lighthouse 要落临时报告文件与 Chrome 的 user-data-dir。
+# PrivateTmp=true 已经给了本服务一个私有的 /tmp，lighthouse-runner.mjs 的
+# mkdtemp 就落在那里——所以**不必**为 /tmp 单独开 ReadWritePaths。
+ReadWritePaths=/var/lib/miaowa-site-audit
+LimitNOFILE=65535
+
+# ---------------------------------------------------------------------------
+# TasksMax=1024，不是 256。
+#
+# 这是一个单测与手工跑都测不出来的部署缺陷（两者都不在这个 cgroup 里）：
+#
+#   Worker 常驻 task 数          238   ← UV_THREADPOOL_SIZE=128 吃掉大头
+#   Chrome + Lighthouse 峰值再需  247
+#   合计                         485   >>  256
+#
+# 超了之后 Chrome fork 不出渲染进程，Lighthouse 直接崩，而深检查报出来的是
+# 「本次未取得浏览器检测结果（crashed）」——一个**指向错误方向**的结论：
+# 看起来像 Chrome 装坏了或目标站有问题，实际是 cgroup 的任务数上限。
+#
+# 1024 = 实测 485 再翻一倍。它与 UV_THREADPOOL_SIZE 强耦合：
+# 调大线程池就要同步调大这里，否则会以「Chrome 崩溃」的形式表现出来。
+TasksMax=1024
+
+# ---------------------------------------------------------------------------
+# MemoryMax=2200M。
+#
+# 实测 Lighthouse 在真实外贸站上的内存峰值（沙箱里单独量 Lighthouse）：
+#
+#   | 站点                | 内存峰值 | 耗时   |
+#   | made-in-china.com   |  581/725 MB | 60.0/22.3 s |
+#   | alibaba.com         |  741 MB     | 24.7 s |
+#   | hktdc.com           |  717 MB     | 23.6 s |
+#   | tradeindia.com      |  853 MB     | 20.5 s |
+#   | globalsources.com   | 1073 MB     | 61.3 s |  ← 最坏
+#
+# **但那个数不能直接当 MemoryMax 用**——沙箱 scope 里只有 Lighthouse，
+# 而本单元的 cgroup 还装着 Worker 自身与 allowlist 代理。
+# 同一批站点量**生产 cgroup 全量峰值**：
+#
+#   made-in-china.com    690 MB / 18.6 s
+#   globalsources.com   1455 MB / 51.7 s   ← 比沙箱里量的高 380 MB
+#
+# 所以取 2200M 而不是 1600M：1600M 对 1455 MB 只剩 145 MB 余量（91% 利用率），
+# 一个比 globalsources 更重的站就会在上限处被 OOM kill。
+#
+# **教训**：在哪个边界上量，量出来的就是哪个边界的数。
+# 把沙箱里量的 Lighthouse 峰值当成服务 cgroup 的上限，会低估约 26%。
+#
+# 反直觉的一条，写在这里免得有人「优化」：--only-audits 窄配置**不比**
+# 完整 performance 分类省内存（窄配置 globalsources 1073 MB >
+# 完整分类 walmart 849 MB），因为吃内存的是采集阶段不是审计计算。
+#
+# OOMScoreAdjust=500 主动把本服务标记为「优先被杀」（范围 -1000 ~ 1000）：
+# 内核 OOM killer 默认按 RSS 挑牺牲者，而本服务恰恰是全机最大的内存户。
+# 不标记的话，被杀的很可能是同机上更要紧、但占用更小的服务。
+MemoryMax=2200M
+OOMScoreAdjust=500
+
+[Install]
+WantedBy=multi-user.target

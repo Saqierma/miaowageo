@@ -1,0 +1,138 @@
+{
+  "lighthouseVersion": "13.4.1",
+  "requestedUrl": "https://www.made-in-china.com/",
+  "mainDocumentUrl": "https://m.made-in-china.com/",
+  "finalUrl": "https://m.made-in-china.com/",
+  "finalDisplayedUrl": "https://m.made-in-china.com/",
+  "fetchTime": "2026-08-06T14:13:17.250Z",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+  "runWarnings": [
+    "The page may not be loading as expected because your test URL (https://www.made-in-china.com/) was redirected to https://m.made-in-china.com/. Try testing the second URL directly."
+  ],
+  "audits": {
+    "agent-accessibility-tree": {
+      "id": "agent-accessibility-tree",
+      "title": "Accessibility tree is not well-formed",
+      "description": "A well-formed [accessibility tree](https://developer.chrome.com/docs/lighthouse/agentic-browsing/accessibility-for-agents) helps AI agents to navigate and interact with the page.",
+      "score": 0,
+      "scoreDisplayMode": "binary",
+      "details": {
+        "type": "list",
+        "items": [
+          {
+            "type": "list-section",
+            "title": "Failed Audits",
+            "value": {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "description",
+                  "valueType": "text",
+                  "label": "Description"
+                },
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "label": "Failing Element"
+                }
+              ],
+              "items": [
+                {
+                  "description": "ARIA role should be appropriate for the element",
+                  "node": {
+                    "type": "node",
+                    "lhId": "1-0-A",
+                    "path": "1,HTML,1,BODY,11,DIV,3,DIV,5,DIV,1,DIV,1,DIV,0,DIV,0,A",
+                    "selector": "div.block-container > div.swiper-container > div#swiper-wrapper-4d101eb8da99d51034 > a.swiper-slide",
+                    "boundingRect": {
+                      "top": 632,
+                      "bottom": 732,
+                      "left": 220,
+                      "right": 303,
+                      "width": 83,
+                      "height": 100
+                    },
+                    "snippet": "<a class=\"swiper-slide list-item swiper-slide-active\" href=\"/start-up/?startupType=tp&amp;previous=OQJEHntMzmrG_cQmETxtrxnuy_QnxJgERDGmAf&amp;…\" rel=\"nofollow\" faw-exposure-sub=\"\" ads-data=\"st:31,pdid:QplrAkiHsWVe,pcid:bMqnEoKdEAIB,a:1,smat:EDZGUnmTNAxQ,stype:cate…\" role=\"group\" aria-label=\"1 / 3\" faw-id=\"1jvbmnonied2\" style=\"margin-right: 8px;\">",
+                    "nodeLabel": "Smart Phone"
+                  }
+                },
+                {
+                  "description": "Form elements must have labels",
+                  "node": {
+                    "type": "node",
+                    "lhId": "1-81-INPUT",
+                    "path": "1,HTML,1,BODY,11,DIV,2,DIV,1,HEADER,0,DIV,3,FORM,0,DIV,1,DIV,0,INPUT",
+                    "selector": "form.svelte-78ax1x > div.mh-search-container > div.search-camera > input.search-picture",
+                    "boundingRect": {
+                      "top": 64,
+                      "bottom": 93,
+                      "left": 363,
+                      "right": 386,
+                      "width": 23,
+                      "height": 29
+                    },
+                    "snippet": "<input class=\"search-picture svelte-78ax1x\" name=\"picture\" type=\"file\" accept=\".jpg,.jpeg,image/png,image/bmp\">",
+                    "nodeLabel": "form.svelte-78ax1x > div.mh-search-container > div.search-camera > input.search-picture"
+                  }
+                },
+                {
+                  "description": "Links must have discernible text",
+                  "node": {
+                    "type": "node",
+                    "lhId": "1-83-A",
+                    "path": "1,HTML,1,BODY,11,DIV,2,DIV,1,HEADER,0,DIV,2,H1,0,A",
+                    "selector": "header.m-header-search > div.mh-search-wrap > h1 > a.mh-logo",
+                    "boundingRect": {
+                      "top": 14,
+                      "bottom": 44,
+                      "left": 113,
+                      "right": 289,
+                      "width": 176,
+                      "height": 30
+                    },
+                    "snippet": "<a class=\"mh-logo svelte-78ax1x\" href=\"//m.made-in-china.com/\" ads-data=\"st:45\" style=\"opacity: 1;\">",
+                    "nodeLabel": "header.m-header-search > div.mh-search-wrap > h1 > a.mh-logo"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "cumulative-layout-shift": {
+      "id": "cumulative-layout-shift",
+      "title": "Cumulative Layout Shift",
+      "description": "Cumulative Layout Shift measures the movement of visible elements within the viewport. [Learn more about the Cumulative Layout Shift metric](https://web.dev/articles/cls).",
+      "score": 1,
+      "scoreDisplayMode": "numeric",
+      "numericValue": 0.001313162379235274,
+      "numericUnit": "unitless",
+      "displayValue": "0.001",
+      "scoringOptions": {
+        "p10": 0.1,
+        "median": 0.25
+      },
+      "details": {
+        "type": "debugdata",
+        "items": [
+          {
+            "cumulativeLayoutShiftMainFrame": 0.001313162379235274,
+            "newEngineResult": {
+              "cumulativeLayoutShift": 0.001313162379235274,
+              "cumulativeLayoutShiftMainFrame": 0.001313162379235274
+            },
+            "newEngineResultDiffered": false
+          }
+        ]
+      }
+    }
+  },
+  "configSettings": {
+    "formFactor": "mobile",
+    "onlyAudits": [
+      "agent-accessibility-tree",
+      "cumulative-layout-shift"
+    ]
+  }
+}

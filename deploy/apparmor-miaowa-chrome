@@ -1,0 +1,30 @@
+# 检测 Worker 使用的 Chrome for Testing。
+#
+# 装到 /etc/apparmor.d/miaowa-chrome，然后 `apparmor_parser -r`。
+#
+# 为什么需要它：Ubuntu 24.04 默认 kernel.apparmor_restrict_unprivileged_userns=1，
+# 非特权进程无法创建 user namespace，Chrome 的命名空间沙箱因此起不来。
+# 而我们要求「以非 root 运行，保留沙箱，不加 --no-sandbox」——
+# 这个 Worker 会用真实浏览器去加载**陌生人提交的任意 URL**，
+# 关掉沙箱等于把整台机器交给对方的页面。
+#
+# 三种解法里选这一种的理由：
+#   sysctl 全局设 0          → 影响整台机器上的所有进程，加固白装
+#   SUID chrome_sandbox      → 需要 setuid root 的辅助二进制，攻击面更大
+#   针对单个二进制的 profile → 只对下面这一个绝对路径生效  ← 选它
+#
+# flags=(unconfined) 表示不额外限制该二进制——我们要的不是限制它，
+# 而是让它拿到 userns 能力；`userns` 那一行是唯一实际授予的东西。
+#
+# **做过 A/B 对照**，两次都是干净的结果：
+#   装了 profile → Chrome 正常启动，无任何沙箱报错
+#   卸掉 profile → 立刻 `FATAL: No usable sandbox!` 并 SIGABRT
+# 也就是说，这份文件不在的话，深检查在 24.04 上根本跑不起来。
+# 「装上能跑」不足以证明是它起的作用——**必须看到卸掉之后失败**。
+abi <abi/4.0>,
+include <tunables/global>
+
+profile miaowa-chrome /opt/chrome/chrome-linux64/chrome flags=(unconfined) {
+  userns,
+  include if exists <local/miaowa-chrome>
+}

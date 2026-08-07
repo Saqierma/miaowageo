@@ -1,0 +1,686 @@
+{
+  "captchaResult": "CAPTCHA_NOT_NEEDED",
+  "kind": "pagespeedonline#result",
+  "id": "https://www.globalsources.com/",
+  "loadingExperience": {
+    "id": "https://www.globalsources.com/",
+    "metrics": {
+      "CUMULATIVE_LAYOUT_SHIFT_SCORE": {
+        "percentile": 11,
+        "distributions": [
+          {
+            "min": 0,
+            "max": 10,
+            "proportion": 0.7082
+          },
+          {
+            "min": 10,
+            "max": 25,
+            "proportion": 0.2368
+          },
+          {
+            "min": 25,
+            "proportion": 0.0549
+          }
+        ],
+        "category": "AVERAGE"
+      },
+      "EXPERIMENTAL_TIME_TO_FIRST_BYTE": {
+        "percentile": 955,
+        "distributions": [
+          {
+            "min": 0,
+            "max": 800,
+            "proportion": 0.6673
+          },
+          {
+            "min": 800,
+            "max": 1800,
+            "proportion": 0.2618
+          },
+          {
+            "min": 1800,
+            "proportion": 0.0709
+          }
+        ],
+        "category": "AVERAGE"
+      },
+      "FIRST_CONTENTFUL_PAINT_MS": {
+        "percentile": 2240,
+        "distributions": [
+          {
+            "min": 0,
+            "max": 1800,
+            "proportion": 0.6416
+          },
+          {
+            "min": 1800,
+            "max": 3000,
+            "proportion": 0.2084
+          },
+          {
+            "min": 3000,
+            "proportion": 0.1499
+          }
+        ],
+        "category": "AVERAGE"
+      },
+      "INTERACTION_TO_NEXT_PAINT": {
+        "percentile": 315,
+        "distributions": [
+          {
+            "min": 0,
+            "max": 200,
+            "proportion": 0.5564
+          },
+          {
+            "min": 200,
+            "max": 500,
+            "proportion": 0.3007
+          },
+          {
+            "min": 500,
+            "proportion": 0.143
+          }
+        ],
+        "category": "AVERAGE"
+      },
+      "LARGEST_CONTENTFUL_PAINT_MS": {
+        "percentile": 2347,
+        "distributions": [
+          {
+            "min": 0,
+            "max": 2500,
+            "proportion": 0.7734
+          },
+          {
+            "min": 2500,
+            "max": 4000,
+            "proportion": 0.1268
+          },
+          {
+            "min": 4000,
+            "proportion": 0.0997
+          }
+        ],
+        "category": "FAST"
+      }
+    },
+    "overall_category": "AVERAGE",
+    "initial_url": "https://www.globalsources.com/"
+  },
+  "originLoadingExperience": {
+    "id": "https://www.globalsources.com",
+    "metrics": {
+      "CUMULATIVE_LAYOUT_SHIFT_SCORE": {
+        "percentile": 8,
+        "distributions": [
+          {
+            "min": 0,
+            "max": 10,
+            "proportion": 0.8015
+          },
+          {
+            "min": 10,
+            "max": 25,
+            "proportion": 0.1545
+          },
+          {
+            "min": 25,
+            "proportion": 0.044
+          }
+        ],
+        "category": "FAST"
+      },
+      "EXPERIMENTAL_TIME_TO_FIRST_BYTE": {
+        "percentile": 1037,
+        "distributions": [
+          {
+            "min": 0,
+            "max": 800,
+            "proportion": 0.5934
+          },
+          {
+            "min": 800,
+            "max": 1800,
+            "proportion": 0.3271
+          },
+          {
+            "min": 1800,
+            "proportion": 0.0794
+          }
+        ],
+        "category": "AVERAGE"
+      },
+      "FIRST_CONTENTFUL_PAINT_MS": {
+        "percentile": 2708,
+        "distributions": [
+          {
+            "min": 0,
+            "max": 1800,
+            "proportion": 0.535
+          },
+          {
+            "min": 1800,
+            "max": 3000,
+            "proportion": 0.2519
+          },
+          {
+            "min": 3000,
+            "proportion": 0.213
+          }
+        ],
+        "category": "AVERAGE"
+      },
+      "INTERACTION_TO_NEXT_PAINT": {
+        "percentile": 308,
+        "distributions": [
+          {
+            "min": 0,
+            "max": 200,
+            "proportion": 0.5819
+          },
+          {
+            "min": 200,
+            "max": 500,
+            "proportion": 0.2844
+          },
+          {
+            "min": 500,
+            "proportion": 0.1337
+          }
+        ],
+        "category": "AVERAGE"
+      },
+      "LARGEST_CONTENTFUL_PAINT_MS": {
+        "percentile": 2858,
+        "distributions": [
+          {
+            "min": 0,
+            "max": 2500,
+            "proportion": 0.6849
+          },
+          {
+            "min": 2500,
+            "max": 4000,
+            "proportion": 0.1653
+          },
+          {
+            "min": 4000,
+            "proportion": 0.1498
+          }
+        ],
+        "category": "AVERAGE"
+      }
+    },
+    "overall_category": "AVERAGE",
+    "initial_url": "https://www.globalsources.com/"
+  },
+  "analysisUTCTimestamp": "2026-08-06T13:51:38.614Z",
+  "lighthouseResult": {
+    "requestedUrl": "https://www.globalsources.com/",
+    "finalUrl": "https://www.globalsources.com/",
+    "finalDisplayedUrl": "https://www.globalsources.com/",
+    "mainDocumentUrl": "https://www.globalsources.com/",
+    "lighthouseVersion": "13.4.1",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.7871.186 Safari/537.36",
+    "fetchTime": "2026-08-06T13:51:38.614Z",
+    "runWarnings": [],
+    "configSettings": {
+      "formFactor": "mobile"
+    },
+    "categories": {
+      "performance": {
+        "id": "performance",
+        "title": "Performance",
+        "score": 0.25,
+        "auditRefs": [
+          {
+            "id": "first-contentful-paint",
+            "weight": 10,
+            "group": "metrics",
+            "acronym": "FCP"
+          },
+          {
+            "id": "largest-contentful-paint",
+            "weight": 25,
+            "group": "metrics",
+            "acronym": "LCP"
+          },
+          {
+            "id": "total-blocking-time",
+            "weight": 30,
+            "group": "metrics",
+            "acronym": "TBT"
+          },
+          {
+            "id": "cumulative-layout-shift",
+            "weight": 25,
+            "group": "metrics",
+            "acronym": "CLS"
+          },
+          {
+            "id": "speed-index",
+            "weight": 10,
+            "group": "metrics",
+            "acronym": "SI"
+          },
+          {
+            "id": "cache-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "cls-culprits-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "document-latency-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "dom-size-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "duplicated-javascript-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "font-display-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "forced-reflow-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "image-delivery-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "inp-breakdown-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "lcp-breakdown-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "lcp-discovery-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "legacy-javascript-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "network-dependency-tree-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "render-blocking-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "third-parties-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "viewport-insight",
+            "weight": 0,
+            "group": "insights"
+          },
+          {
+            "id": "interactive",
+            "weight": 0,
+            "group": "hidden",
+            "acronym": "TTI"
+          },
+          {
+            "id": "max-potential-fid",
+            "weight": 0,
+            "group": "hidden"
+          },
+          {
+            "id": "unminified-css",
+            "weight": 0,
+            "group": "diagnostics"
+          },
+          {
+            "id": "unminified-javascript",
+            "weight": 0,
+            "group": "diagnostics"
+          },
+          {
+            "id": "unused-css-rules",
+            "weight": 0,
+            "group": "diagnostics"
+          },
+          {
+            "id": "unused-javascript",
+            "weight": 0,
+            "group": "diagnostics"
+          },
+          {
+            "id": "total-byte-weight",
+            "weight": 0,
+            "group": "diagnostics"
+          },
+          {
+            "id": "user-timings",
+            "weight": 0,
+            "group": "diagnostics"
+          },
+          {
+            "id": "bootup-time",
+            "weight": 0,
+            "group": "diagnostics"
+          },
+          {
+            "id": "mainthread-work-breakdown",
+            "weight": 0,
+            "group": "diagnostics"
+          },
+          {
+            "id": "long-tasks",
+            "weight": 0,
+            "group": "diagnostics"
+          },
+          {
+            "id": "non-composited-animations",
+            "weight": 0,
+            "group": "diagnostics"
+          },
+          {
+            "id": "unsized-images",
+            "weight": 0,
+            "group": "diagnostics"
+          },
+          {
+            "id": "network-requests",
+            "weight": 0,
+            "group": "hidden"
+          },
+          {
+            "id": "network-rtt",
+            "weight": 0,
+            "group": "hidden"
+          },
+          {
+            "id": "network-server-latency",
+            "weight": 0,
+            "group": "hidden"
+          },
+          {
+            "id": "main-thread-tasks",
+            "weight": 0,
+            "group": "hidden"
+          },
+          {
+            "id": "diagnostics",
+            "weight": 0,
+            "group": "hidden"
+          },
+          {
+            "id": "metrics",
+            "weight": 0,
+            "group": "hidden"
+          },
+          {
+            "id": "screenshot-thumbnails",
+            "weight": 0,
+            "group": "hidden"
+          },
+          {
+            "id": "final-screenshot",
+            "weight": 0,
+            "group": "hidden"
+          },
+          {
+            "id": "script-treemap-data",
+            "weight": 0,
+            "group": "hidden"
+          },
+          {
+            "id": "resource-summary",
+            "weight": 0,
+            "group": "hidden"
+          },
+          {
+            "id": "redirects",
+            "weight": 0,
+            "group": "hidden"
+          },
+          {
+            "id": "server-response-time",
+            "weight": 0,
+            "group": "hidden"
+          },
+          {
+            "id": "layout-shifts",
+            "weight": 0,
+            "group": "hidden"
+          }
+        ]
+      },
+      "agentic-browsing": {
+        "id": "agentic-browsing",
+        "title": "Agentic Browsing",
+        "description": "These checks ensure high-quality, [browsable websites for AI agents](https://goo.gle/lighthouse-agentic-web) and validate the correctness of WebMCP integrations. This category is still under development and subject to change.",
+        "score": 0.48,
+        "auditRefs": [
+          {
+            "id": "agent-accessibility-tree",
+            "weight": 1,
+            "group": "agent-accessibility"
+          },
+          {
+            "id": "webmcp-form-coverage",
+            "weight": 0,
+            "group": "webmcp"
+          },
+          {
+            "id": "webmcp-registered-tools",
+            "weight": 0,
+            "group": "webmcp"
+          },
+          {
+            "id": "webmcp-schema-validity",
+            "weight": 0,
+            "group": "webmcp"
+          },
+          {
+            "id": "cumulative-layout-shift",
+            "weight": 1,
+            "acronym": "CLS"
+          },
+          {
+            "id": "llms-txt",
+            "weight": 0,
+            "group": "agent-accessibility"
+          }
+        ],
+        "categoryScoreDisplayMode": "fraction"
+      }
+    },
+    "audits": {
+      "agent-accessibility-tree": {
+        "id": "agent-accessibility-tree",
+        "title": "Accessibility tree is not well-formed",
+        "description": "A well-formed [accessibility tree](https://developer.chrome.com/docs/lighthouse/agentic-browsing/accessibility-for-agents) helps AI agents to navigate and interact with the page.",
+        "score": 0,
+        "scoreDisplayMode": "binary",
+        "details": {
+          "items": [
+            {
+              "type": "list-section",
+              "value": {
+                "items": [
+                  {
+                    "node": {
+                      "snippet": "<button data-v-4e8d8b39=\"\" class=\"float-promo-btn z-2001 b-rd-50% bg-#E72528 flex items-center justify-cente…\">",
+                      "selector": "div.bg-#F5F4FF > main > div.home-float-promo > button.float-promo-btn",
+                      "boundingRect": {
+                        "height": 56,
+                        "left": 351,
+                        "bottom": 758,
+                        "top": 702,
+                        "width": 56,
+                        "right": 407
+                      },
+                      "path": "1,HTML,1,BODY,6,DIV,0,DIV,1,DIV,1,MAIN,9,DIV,1,BUTTON",
+                      "lhId": "1-0-BUTTON",
+                      "type": "node",
+                      "nodeLabel": "div.bg-#F5F4FF > main > div.home-float-promo > button.float-promo-btn"
+                    },
+                    "description": "Buttons must have discernible text"
+                  },
+                  {
+                    "node": {
+                      "type": "node",
+                      "nodeLabel": "div.w-318 > div.p-16 > div.flex-ver > a.cursor-pointer",
+                      "lhId": "1-100-A",
+                      "boundingRect": {
+                        "bottom": 6141,
+                        "height": 48,
+                        "width": 48,
+                        "right": 84,
+                        "top": 6093,
+                        "left": 36
+                      },
+                      "path": "1,HTML,1,BODY,6,DIV,0,DIV,1,DIV,1,MAIN,8,DIV,1,DIV,0,DIV,1,DIV,0,DIV,0,DIV,0,DIV,0,A",
+                      "selector": "div.w-318 > div.p-16 > div.flex-ver > a.cursor-pointer",
+                      "snippet": "<a data-v-cf3aac53=\"\" class=\"cursor-pointer !ds:absolute ds:left-50% ds:top-0 ds:translate-x--50%\" href=\"https://clover-industrial.manufacturer.globalsources.com/homepage_60088516…\" target=\"_blank\" rel=\"noopener\">"
+                    },
+                    "description": "Links must have discernible text"
+                  }
+                ],
+                "type": "table",
+                "headings": [
+                  {
+                    "key": "description",
+                    "valueType": "text",
+                    "label": "Description"
+                  },
+                  {
+                    "key": "node",
+                    "valueType": "node",
+                    "label": "Failing Element"
+                  }
+                ]
+              },
+              "title": "Failed Audits"
+            }
+          ],
+          "type": "list"
+        }
+      },
+      "webmcp-form-coverage": {
+        "id": "webmcp-form-coverage",
+        "title": "WebMCP form coverage",
+        "description": "Consider adding [WebMCP](https://developer.chrome.com/docs/ai/webmcp) annotations to the forms listed below. This helps AI agents identify and interact with these forms more reliably.",
+        "score": null,
+        "scoreDisplayMode": "notApplicable"
+      },
+      "webmcp-registered-tools": {
+        "id": "webmcp-registered-tools",
+        "title": "WebMCP tools registered",
+        "description": "Lists the [WebMCP tools](https://developer.chrome.com/docs/ai/webmcp) registered at the time of analysis.",
+        "score": null,
+        "scoreDisplayMode": "notApplicable"
+      },
+      "webmcp-schema-validity": {
+        "id": "webmcp-schema-validity",
+        "title": "WebMCP schemas are valid",
+        "description": "Valid [WebMCP schemas](https://developer.chrome.com/docs/ai/webmcp) are required for AI agents to understand and interact with tools correctly. Please fix any errors or warnings reported by the browser.",
+        "score": null,
+        "scoreDisplayMode": "notApplicable"
+      },
+      "cumulative-layout-shift": {
+        "id": "cumulative-layout-shift",
+        "title": "Cumulative Layout Shift",
+        "description": "Cumulative Layout Shift measures the movement of visible elements within the viewport. [Learn more about the Cumulative Layout Shift metric](https://web.dev/articles/cls).",
+        "score": 0.95,
+        "scoreDisplayMode": "numeric",
+        "displayValue": "0.078",
+        "details": {
+          "items": [
+            {
+              "newEngineResultDiffered": false,
+              "cumulativeLayoutShiftMainFrame": 0.07776427703523693,
+              "newEngineResult": {
+                "cumulativeLayoutShift": 0.07776427703523693,
+                "cumulativeLayoutShiftMainFrame": 0.07776427703523693
+              }
+            }
+          ],
+          "type": "debugdata"
+        },
+        "numericValue": 0.07776427703523693,
+        "numericUnit": "unitless"
+      },
+      "llms-txt": {
+        "id": "llms-txt",
+        "title": "llms.txt follows recommendations",
+        "description": "If your llms.txt file does not follow recommendations, large language models may not be able to understand how you want your website to be crawled or used for training. The [llms.txt](https://llmstxt.org/) file should be a Markdown file containing at least one H1 header. [Learn more about the llms.txt audit](https://developer.chrome.com/docs/lighthouse/agentic-browsing/llms-txt).",
+        "score": null,
+        "scoreDisplayMode": "notApplicable"
+      },
+      "largest-contentful-paint": {
+        "id": "largest-contentful-paint",
+        "title": "Largest Contentful Paint",
+        "description": "Largest Contentful Paint marks the time at which the largest text or image is painted. [Learn more about the Largest Contentful Paint metric](https://developer.chrome.com/docs/lighthouse/performance/lighthouse-largest-contentful-paint/)",
+        "score": 0,
+        "scoreDisplayMode": "numeric",
+        "displayValue": "10.6 s",
+        "numericValue": 10584.692557643106,
+        "numericUnit": "millisecond"
+      },
+      "first-contentful-paint": {
+        "id": "first-contentful-paint",
+        "title": "First Contentful Paint",
+        "description": "First Contentful Paint marks the time at which the first text or image is painted. [Learn more about the First Contentful Paint metric](https://developer.chrome.com/docs/lighthouse/performance/first-contentful-paint/).",
+        "score": 0,
+        "scoreDisplayMode": "numeric",
+        "displayValue": "7.7 s",
+        "numericValue": 7734.690767855042,
+        "numericUnit": "millisecond"
+      },
+      "speed-index": {
+        "id": "speed-index",
+        "title": "Speed Index",
+        "description": "Speed Index shows how quickly the contents of a page are visibly populated. [Learn more about the Speed Index metric](https://developer.chrome.com/docs/lighthouse/performance/speed-index/).",
+        "score": 0,
+        "scoreDisplayMode": "numeric",
+        "displayValue": "19.0 s",
+        "numericValue": 19019.14411842703,
+        "numericUnit": "millisecond"
+      },
+      "total-blocking-time": {
+        "id": "total-blocking-time",
+        "title": "Total Blocking Time",
+        "description": "Sum of all time periods between FCP and Time to Interactive, when task length exceeded 50ms, expressed in milliseconds. [Learn more about the Total Blocking Time metric](https://developer.chrome.com/docs/lighthouse/performance/lighthouse-total-blocking-time/).",
+        "score": 0.04,
+        "scoreDisplayMode": "numeric",
+        "displayValue": "2,570 ms",
+        "numericValue": 2565.999999999998,
+        "numericUnit": "millisecond"
+      }
+    }
+  }
+}

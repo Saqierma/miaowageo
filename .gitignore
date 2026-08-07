@@ -1,0 +1,14 @@
+node_modules/
+npm-debug.log*
+*.tgz
+
+# 证书与密钥绝不进版本库。deploy/gen-worker-cert.sh 生成的东西都落在
+# /etc/miaowa-site-audit/tls 下，这里再兜一道。
+*.pem
+*.key
+*.crt
+.env
+.env.*
+
+.DS_Store
+*.swp

@@ -1,0 +1,9 @@
+# Shopify storefront. Agent instructions: /agents.md
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /cart/
+Disallow: /checkout
+
+User-agent: adsbot-google
+Disallow: /checkout

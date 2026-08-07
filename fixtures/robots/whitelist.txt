@@ -1,0 +1,12 @@
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+Allow: /$
+Allow: /knowledge/
+Allow: /*/company-profile
+Allow: /robots.txt
+Disallow: /
+Crawl-delay: 10
+
+User-agent: *
+Disallow: /admin

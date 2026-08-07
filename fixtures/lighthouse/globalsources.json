@@ -1,0 +1,117 @@
+{
+  "lighthouseVersion": "13.4.1",
+  "requestedUrl": "https://www.globalsources.com/",
+  "mainDocumentUrl": "https://www.globalsources.com/",
+  "finalUrl": "https://www.globalsources.com/",
+  "finalDisplayedUrl": "https://www.globalsources.com/",
+  "fetchTime": "2026-08-06T14:13:37.002Z",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+  "runWarnings": [],
+  "audits": {
+    "agent-accessibility-tree": {
+      "id": "agent-accessibility-tree",
+      "title": "Accessibility tree is not well-formed",
+      "description": "A well-formed [accessibility tree](https://developer.chrome.com/docs/lighthouse/agentic-browsing/accessibility-for-agents) helps AI agents to navigate and interact with the page.",
+      "score": 0,
+      "scoreDisplayMode": "binary",
+      "details": {
+        "type": "list",
+        "items": [
+          {
+            "type": "list-section",
+            "title": "Failed Audits",
+            "value": {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "description",
+                  "valueType": "text",
+                  "label": "Description"
+                },
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "label": "Failing Element"
+                }
+              ],
+              "items": [
+                {
+                  "description": "Buttons must have discernible text",
+                  "node": {
+                    "type": "node",
+                    "lhId": "1-0-BUTTON",
+                    "path": "1,HTML,1,BODY,6,DIV,0,DIV,1,DIV,1,MAIN,9,DIV,1,BUTTON",
+                    "selector": "div.bg-#F5F4FF > main > div.home-float-promo > button.float-promo-btn",
+                    "boundingRect": {
+                      "top": 702,
+                      "bottom": 758,
+                      "left": 351,
+                      "right": 407,
+                      "width": 56,
+                      "height": 56
+                    },
+                    "snippet": "<button data-v-4e8d8b39=\"\" class=\"float-promo-btn z-2001 b-rd-50% bg-#E72528 flex items-center justify-cente…\">",
+                    "nodeLabel": "div.bg-#F5F4FF > main > div.home-float-promo > button.float-promo-btn"
+                  }
+                },
+                {
+                  "description": "Links must have discernible text",
+                  "node": {
+                    "type": "node",
+                    "lhId": "1-94-A",
+                    "path": "1,HTML,1,BODY,6,DIV,0,DIV,1,DIV,1,MAIN,8,DIV,1,DIV,0,DIV,1,DIV,0,DIV,0,DIV,0,DIV,0,A",
+                    "selector": "div.w-318 > div.p-16 > div.flex-ver > a.cursor-pointer",
+                    "boundingRect": {
+                      "top": 6139,
+                      "bottom": 6187,
+                      "left": 36,
+                      "right": 84,
+                      "width": 48,
+                      "height": 48
+                    },
+                    "snippet": "<a data-v-cf3aac53=\"\" class=\"cursor-pointer !ds:absolute ds:left-50% ds:top-0 ds:translate-x--50%\" href=\"https://clover-industrial.manufacturer.globalsources.com/homepage_60088516…\" target=\"_blank\" rel=\"noopener\">",
+                    "nodeLabel": "div.w-318 > div.p-16 > div.flex-ver > a.cursor-pointer"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "cumulative-layout-shift": {
+      "id": "cumulative-layout-shift",
+      "title": "Cumulative Layout Shift",
+      "description": "Cumulative Layout Shift measures the movement of visible elements within the viewport. [Learn more about the Cumulative Layout Shift metric](https://web.dev/articles/cls).",
+      "score": 0.93,
+      "scoreDisplayMode": "numeric",
+      "numericValue": 0.08573983911849525,
+      "numericUnit": "unitless",
+      "displayValue": "0.086",
+      "scoringOptions": {
+        "p10": 0.1,
+        "median": 0.25
+      },
+      "details": {
+        "type": "debugdata",
+        "items": [
+          {
+            "cumulativeLayoutShiftMainFrame": 0.08573983911849525,
+            "newEngineResult": {
+              "cumulativeLayoutShift": 0.08573983911849525,
+              "cumulativeLayoutShiftMainFrame": 0.08573983911849525
+            },
+            "newEngineResultDiffered": false
+          }
+        ]
+      }
+    }
+  },
+  "configSettings": {
+    "formFactor": "mobile",
+    "onlyAudits": [
+      "agent-accessibility-tree",
+      "cumulative-layout-shift"
+    ]
+  }
+}

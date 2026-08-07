@@ -1,0 +1,43 @@
+{
+  "name": "miaowageo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "start": "node src/server.mjs"
+  },
+  "dependencies": {
+    "lighthouse": "^13.4.1"
+  },
+  "//dependencies": "零第三方依赖是本仓库的硬约束，lighthouse 是唯一破例。破例范围被严格限定为：只由 src/lighthouse-runner.mjs 以**子进程**方式调用其 CLI，绝不 import 进主进程。这条边界同时解决三件事——162MB 依赖树不污染主进程模块图、Lighthouse 崩溃不带走 Worker、超时后可以 kill 整棵进程树（Chrome 是多进程，只杀 node 进程会留下每个占几百 MB 的孤儿 renderer）。新增任何其他 dependencies 前请先确认无法用 Node 内建模块实现。",
+  "description": "免费开源的 GEO 检测工具 / Free open-source GEO (Generative Engine Optimization) checker — 检测网站能否被 ChatGPT、Claude、Perplexity、Gemini 抓取、理解与引用",
+  "license": "AGPL-3.0-only",
+  "homepage": "https://miaowageo.com/geocheck",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Saqierma/miaowageo.git"
+  },
+  "keywords": [
+    "geo",
+    "generative-engine-optimization",
+    "seo",
+    "ai-seo",
+    "gptbot",
+    "oai-searchbot",
+    "claudebot",
+    "perplexitybot",
+    "robots-txt",
+    "llms-txt",
+    "ai-crawler",
+    "ai-search",
+    "seo-audit",
+    "lighthouse",
+    "GEO检测",
+    "生成式引擎优化",
+    "AI搜索优化"
+  ]
+}
