@@ -1,0 +1,444 @@
+[
+  {
+    "id": "robots.oai-searchbot",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/robots.txt"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "robots.perplexitybot",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/robots.txt"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "robots.claudebot",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/robots.txt"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "robots.bingbot",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/robots.txt"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "robots.google-extended",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/robots.txt"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "robots.chatgpt-user",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/robots.txt"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "robots.claude-user",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/robots.txt"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "robots.perplexity-user",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/robots.txt"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "robots.applebot",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/robots.txt"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "robots.gptbot",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": false,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/robots.txt"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "robots.applebot-extended",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": false,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/robots.txt"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "robots.amazonbot",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": false,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/robots.txt"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "robots.ccbot",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": false,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/robots.txt"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "readability.static-text",
+    "group": "readability",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。静态可读性未测。"
+  },
+  {
+    "id": "structured.jsonld",
+    "group": "structured",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。结构化数据未测。"
+  },
+  {
+    "id": "structured.sameas",
+    "group": "structured",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": false,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。结构化数据未测。"
+  },
+  {
+    "id": "access.canonical",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。canonical 未测。"
+  },
+  {
+    "id": "access.noindex",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。noindex 未测。"
+  },
+  {
+    "id": "metadata.title",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。页面标题未测。"
+  },
+  {
+    "id": "metadata.description",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。页面描述未测。"
+  },
+  {
+    "id": "metadata.h1",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。H1 结构未测。"
+  },
+  {
+    "id": "metadata.lang",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。语言声明未测。"
+  },
+  {
+    "id": "metadata.hreflang",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。hreflang 未测。"
+  },
+  {
+    "id": "metadata.viewport",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。移动端视口未测。"
+  },
+  {
+    "id": "metadata.og",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。Open Graph 未测。"
+  },
+  {
+    "id": "metadata.img-alt",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。图片替代文本未测。"
+  },
+  {
+    "id": "access.sitemap",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/sitemap.xml"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。sitemap 未测。"
+  },
+  {
+    "id": "agent.ucp",
+    "group": "agent",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": false,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/.well-known/ucp"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "agent.agents-md",
+    "group": "agent",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": false,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/agents.md"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "agent.llms-txt",
+    "group": "agent",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": false,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-a.com/llms.txt"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "performance.psi-score",
+    "group": "performance",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://www.example-site-a.com/"
+    },
+    "limitation": "该测量实际落在 https://www.example-site-a.com/，与提交的 https://example-site-a.com/ 不是同一主机——移动端跳转会改变被测对象。",
+    "observation": "PageSpeed Insights 移动端性能分 46（满分 100）。"
+  },
+  {
+    "id": "performance.crux-field",
+    "group": "performance",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://example-site-a.com/"
+    },
+    "limitation": null,
+    "observation": "CrUX 真实用户数据共 5 项指标：CLS AVERAGE、TTFB SLOW、FCP SLOW、INP AVERAGE、LCP SLOW。"
+  },
+  {
+    "id": "agent.accessibility-tree",
+    "group": "agent",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://www.example-site-a.com/"
+    },
+    "limitation": "浏览器检测实际落在 https://www.example-site-a.com/（主机 www.example-site-a.com），与轻检查的基准主机 example-site-a.com 不同。",
+    "observation": "浏览器构建出的可访问性树结构不完整（Lighthouse：Accessibility tree is not well-formed）。"
+  },
+  {
+    "id": "agent.cls",
+    "group": "agent",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "warn",
+    "evidence": {
+      "url": "https://www.example-site-a.com/"
+    },
+    "limitation": "浏览器检测实际落在 https://www.example-site-a.com/（主机 www.example-site-a.com），与轻检查的基准主机 example-site-a.com 不同。",
+    "observation": "累积布局偏移（CLS）实测 0.116。"
+  }
+]

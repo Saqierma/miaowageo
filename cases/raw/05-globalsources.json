@@ -1,0 +1,447 @@
+[
+  {
+    "id": "robots.oai-searchbot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "warn",
+    "evidence": {
+      "url": "https://www.globalsources.com/robots.txt"
+    },
+    "limitation": "未评估这些放行路径是否覆盖了贵站的核心内容页。",
+    "observation": "robots.txt 中针对 OAI-SearchBot 为白名单放行，仅开放 /$、/knowledge/、/helpCenter/、/STM/、/site/ 等 10 条 等路径。这是有意配置，不是封禁。"
+  },
+  {
+    "id": "robots.perplexitybot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "warn",
+    "evidence": {
+      "url": "https://www.globalsources.com/robots.txt"
+    },
+    "limitation": "未评估这些放行路径是否覆盖了贵站的核心内容页。",
+    "observation": "robots.txt 中针对 PerplexityBot 为白名单放行，仅开放 /$、/category/、/knowledge/、/helpCenter/、/STM/ 等 12 条 等路径。这是有意配置，不是封禁。"
+  },
+  {
+    "id": "robots.claudebot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "warn",
+    "evidence": {
+      "url": "https://www.globalsources.com/robots.txt"
+    },
+    "limitation": "未评估这些放行路径是否覆盖了贵站的核心内容页。",
+    "observation": "robots.txt 中针对 ClaudeBot 为白名单放行，仅开放 /$、/category/、/knowledge/、/helpCenter/、/STM/ 等 11 条 等路径。这是有意配置，不是封禁。"
+  },
+  {
+    "id": "robots.bingbot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://www.globalsources.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 Bingbot 抓取本站。"
+  },
+  {
+    "id": "robots.google-extended",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "warn",
+    "evidence": {
+      "url": "https://www.globalsources.com/robots.txt"
+    },
+    "limitation": "未评估这些放行路径是否覆盖了贵站的核心内容页。",
+    "observation": "robots.txt 中针对 Google-Extended 为白名单放行，仅开放 /$、/category/、/knowledge/、/helpCenter/、/STM/ 等 12 条 等路径。这是有意配置，不是封禁。"
+  },
+  {
+    "id": "robots.chatgpt-user",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "warn",
+    "evidence": {
+      "url": "https://www.globalsources.com/robots.txt"
+    },
+    "limitation": "未评估这些放行路径是否覆盖了贵站的核心内容页。",
+    "observation": "robots.txt 中针对 ChatGPT-User 为白名单放行，仅开放 /$、/knowledge/、/helpCenter/、/STM/、/site/ 等 10 条 等路径。这是有意配置，不是封禁。"
+  },
+  {
+    "id": "robots.claude-user",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "warn",
+    "evidence": {
+      "url": "https://www.globalsources.com/robots.txt"
+    },
+    "limitation": "未评估这些放行路径是否覆盖了贵站的核心内容页。",
+    "observation": "robots.txt 中针对 Claude-User 为白名单放行，仅开放 /$、/category/、/knowledge/、/helpCenter/、/STM/ 等 11 条 等路径。这是有意配置，不是封禁。"
+  },
+  {
+    "id": "robots.perplexity-user",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "warn",
+    "evidence": {
+      "url": "https://www.globalsources.com/robots.txt"
+    },
+    "limitation": "未评估这些放行路径是否覆盖了贵站的核心内容页。",
+    "observation": "robots.txt 中针对 Perplexity-User 为白名单放行，仅开放 /$、/category/、/knowledge/、/helpCenter/、/STM/ 等 12 条 等路径。这是有意配置，不是封禁。"
+  },
+  {
+    "id": "robots.applebot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://www.globalsources.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 Applebot 抓取本站。"
+  },
+  {
+    "id": "robots.gptbot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://www.globalsources.com/robots.txt"
+    },
+    "limitation": "未评估这些放行路径是否覆盖了贵站的核心内容页。",
+    "observation": "robots.txt 中针对 GPTBot 为白名单放行，仅开放 /$、/knowledge/、/helpCenter/、/STM/、/site/ 等 10 条 等路径。这是有意配置，不是封禁。"
+  },
+  {
+    "id": "robots.applebot-extended",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://www.globalsources.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 Applebot-Extended 抓取本站。"
+  },
+  {
+    "id": "robots.amazonbot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://www.globalsources.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 Amazonbot 抓取本站。"
+  },
+  {
+    "id": "robots.ccbot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://www.globalsources.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 CCBot 抓取本站。"
+  },
+  {
+    "id": "readability.static-text",
+    "group": "readability",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://www.globalsources.com/",
+      "excerpt": "82 字符"
+    },
+    "limitation": "这是一个技术信号。重要内容是否只在浏览器执行脚本后才出现，需要网站人员确认。",
+    "observation": "不执行 JavaScript 时，该页面可读到约 82 个字符的正文。"
+  },
+  {
+    "id": "structured.jsonld",
+    "group": "structured",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://www.globalsources.com/"
+    },
+    "limitation": null,
+    "observation": "页面中未发现任何 JSON-LD 结构化数据。"
+  },
+  {
+    "id": "structured.sameas",
+    "group": "structured",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://www.globalsources.com/"
+    },
+    "limitation": "sameAs 只作为实体一致性的参考，本工具不对它判定好坏。",
+    "observation": "JSON-LD 中未声明 sameAs。"
+  },
+  {
+    "id": "access.canonical",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://www.globalsources.com/",
+      "canonical": null
+    },
+    "limitation": null,
+    "observation": "页面未声明 canonical 标签。"
+  },
+  {
+    "id": "access.noindex",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://www.globalsources.com/",
+      "xRobotsTag": null
+    },
+    "limitation": null,
+    "observation": "页面通过 meta robots 或 X-Robots-Tag 声明了 noindex，会被搜索引擎排除收录。"
+  },
+  {
+    "id": "metadata.title",
+    "group": "metadata",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://www.globalsources.com/"
+    },
+    "limitation": "标题是搜索结果与 AI 引用时最先被读到的文本，缺失时引擎会自行拼凑。",
+    "observation": "页面未声明 <title>。"
+  },
+  {
+    "id": "metadata.description",
+    "group": "metadata",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://www.globalsources.com/"
+    },
+    "limitation": "缺失时搜索引擎会从正文中自行摘录，摘出哪一段不受站点控制。",
+    "observation": "页面未声明 meta description。"
+  },
+  {
+    "id": "metadata.h1",
+    "group": "metadata",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://www.globalsources.com/"
+    },
+    "limitation": "H1 是页面主题的结构化声明，缺失时机器只能从正文推断。",
+    "observation": "页面未发现非空的 <h1>。"
+  },
+  {
+    "id": "metadata.lang",
+    "group": "metadata",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://www.globalsources.com/"
+    },
+    "limitation": "语言声明是搜索引擎与 AI 判断内容语言的首要信号，对多语言站尤其关键。",
+    "observation": "<html> 未声明 lang 属性。"
+  },
+  {
+    "id": "metadata.hreflang",
+    "group": "metadata",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "warn",
+    "evidence": {
+      "url": "https://www.globalsources.com/"
+    },
+    "limitation": "单语言站点无需 hreflang，此项可忽略。若站点有多语言版本，缺失 hreflang 会让各语言版本互相竞争同一批搜索结果。",
+    "observation": "页面未声明 hreflang。"
+  },
+  {
+    "id": "metadata.viewport",
+    "group": "metadata",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://www.globalsources.com/"
+    },
+    "limitation": "移动端会按桌面宽度渲染再整体缩放。Google 的索引以移动端为准，这会直接影响可用性评估。",
+    "observation": "页面未声明响应式 viewport（width=device-width）。"
+  },
+  {
+    "id": "metadata.og",
+    "group": "metadata",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://www.globalsources.com/"
+    },
+    "limitation": "被分享或被 AI 引用时，标题、摘要与配图由对方自行抓取，呈现效果不受站点控制。",
+    "observation": "页面未声明 Open Graph 标签。"
+  },
+  {
+    "id": "metadata.img-alt",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "not_applicable",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://www.globalsources.com/"
+    },
+    "limitation": "若图片由 JavaScript 注入，本工具在不执行脚本的前提下看不到它们。",
+    "observation": "页面中未发现 <img> 元素，图片替代文本不适用。"
+  },
+  {
+    "id": "access.sitemap",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "warn",
+    "evidence": {
+      "url": "https://www.globalsources.com/sitemap.xml"
+    },
+    "limitation": null,
+    "observation": "该路径可达，但响应内容既不是 <urlset> 也不是 <sitemapindex>，可能不是有效的 sitemap。"
+  },
+  {
+    "id": "agent.ucp",
+    "group": "agent",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://www.globalsources.com/.well-known/ucp"
+    },
+    "limitation": null,
+    "observation": "该路径可访问，但返回内容不是合法 JSON，可能并非真正的 UCP 端点。"
+  },
+  {
+    "id": "agent.agents-md",
+    "group": "agent",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://www.globalsources.com/agents.md"
+    },
+    "limitation": null,
+    "observation": "该站提供了 /agents.md，其中包含面向 agent 的补充说明。"
+  },
+  {
+    "id": "agent.llms-txt",
+    "group": "agent",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://www.globalsources.com/llms.txt"
+    },
+    "limitation": null,
+    "observation": "该站未提供 llms.txt。Google 已明确 Search 不使用该文件，缺失不影响搜索可见性，本工具不建议专门为此配置它。"
+  },
+  {
+    "id": "performance.psi-score",
+    "group": "performance",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://www.globalsources.com/"
+    },
+    "limitation": null,
+    "observation": "PageSpeed Insights 移动端性能分 25（满分 100）。"
+  },
+  {
+    "id": "performance.crux-field",
+    "group": "performance",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "warn",
+    "evidence": {
+      "url": "https://www.globalsources.com/"
+    },
+    "limitation": null,
+    "observation": "CrUX 真实用户数据共 5 项指标：CLS AVERAGE、TTFB AVERAGE、FCP AVERAGE、INP AVERAGE、LCP FAST。"
+  },
+  {
+    "id": "agent.accessibility-tree",
+    "group": "agent",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://www.globalsources.com/"
+    },
+    "limitation": null,
+    "observation": "浏览器构建出的可访问性树结构不完整（Lighthouse：Accessibility tree is not well-formed）。"
+  },
+  {
+    "id": "agent.cls",
+    "group": "agent",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://www.globalsources.com/"
+    },
+    "limitation": null,
+    "observation": "累积布局偏移（CLS）实测 0.078。"
+  }
+]

@@ -8,6 +8,10 @@
 
 > 无需注册、不留邮箱、不留手机号。从海外检测点发起，26 项技术检查，每一条结论都附证据与边界。
 
+![妙蛙 GEO 检测工具首页](docs/screenshot-geocheck.png)
+
+📂 **[看 8 份真实的检测报告 →](cases/)** —— 不是构造的样例，是线上跑过的真实站点。
+
 ---
 
 ## 一、现状：一场已经开始、而大多数企业还不知道的迁移
@@ -138,6 +142,19 @@ JSON-LD 与主体类型（Organization / Product / Article 等）、`sameAs` 声
 ### 6. 性能
 
 Google PageSpeed Insights 移动端性能分、CrUX 真实用户字段数据、累积布局偏移（CLS）。
+
+### 真实报告长什么样
+
+[`cases/`](cases/) 目录里有 **8 份真实的检测报告**，包括：
+
+| | |
+| --- | --- |
+| [整站把检测器挡在门外](cases/01-fully-blocked.md) | 26 项里 22 项无从判定，而站点在浏览器里完全正常 |
+| [按 User-Agent 拦截](cases/02-blocked-by-user-agent.md) | 抓取器 403，**同一台机器上的无头浏览器却进得去** |
+| [大型 B2B 平台](cases/05-globalsources.md) | 未通过项比多数中小外贸站还多 |
+| [本工具自己的站点](cases/08-miaowageo.md) | **包括它自己没通过的那一项** |
+
+用户提交的站点已匿名（只换域名，其余数据一字未改），理由写在 [`cases/README.md`](cases/README.md#关于匿名)。
 
 ---
 
@@ -318,6 +335,10 @@ A：不会。轻检查总共只发 7 次请求（预飞规范化、robots.txt、
 
 > No sign-up, no email, no phone number. Requests originate from an overseas checkpoint. 26 technical checks, every conclusion shipped with its evidence *and its limits*.
 
+![miaowageo GEO checker](docs/screenshot-geocheck.png)
+
+📂 **[Read 8 real audit reports →](cases/)** — actual sites run through the live tool, not fabricated samples.
+
 ---
 
 ## 1. The situation: a migration already underway that most companies haven't noticed
@@ -443,6 +464,20 @@ JSON-LD and primary entity types (Organization / Product / Article), plus `sameA
 ### 4.6 Performance
 
 Google PageSpeed Insights mobile score, CrUX field data, Cumulative Layout Shift.
+
+### What a real report looks like
+
+[`cases/`](cases/) contains **8 real audit reports**, including:
+
+| | |
+| --- | --- |
+| [A site that shuts the checker out entirely](cases/01-fully-blocked.md) | 22 of 26 checks undeterminable — while the site loads perfectly in a browser |
+| [User-Agent-based blocking](cases/02-blocked-by-user-agent.md) | 403 to the fetcher, **200 to a headless browser on the same machine** |
+| [A major B2B platform](cases/05-globalsources.md) | More failures than most small exporters |
+| [This tool's own site](cases/08-miaowageo.md) | **Including the check it fails itself** |
+
+Sites submitted by users are anonymised — the domain is replaced, nothing else is touched.
+Reasoning in [`cases/README.md`](cases/README.md#关于匿名).
 
 ---
 

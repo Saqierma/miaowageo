@@ -1,0 +1,444 @@
+[
+  {
+    "id": "robots.oai-searchbot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://example-site-b.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 OAI-SearchBot 抓取本站。"
+  },
+  {
+    "id": "robots.perplexitybot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://example-site-b.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 PerplexityBot 抓取本站。"
+  },
+  {
+    "id": "robots.claudebot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://example-site-b.com/robots.txt"
+    },
+    "limitation": "本工具只读取配置，未验证该平台的实际抓取行为是否遵守它。",
+    "observation": "robots.txt 中针对 ClaudeBot 的规则实质为整站不允许抓取：现有的 Allow 规则（如果有的话）未覆盖任何内容路径。影响 Claude 检索。"
+  },
+  {
+    "id": "robots.bingbot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://example-site-b.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 Bingbot 抓取本站。"
+  },
+  {
+    "id": "robots.google-extended",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "warn",
+    "evidence": {
+      "url": "https://example-site-b.com/robots.txt"
+    },
+    "limitation": "本工具只读取配置，未验证该平台的实际抓取行为是否遵守它。",
+    "observation": "robots.txt 中针对 Google-Extended 的规则实质为整站不允许抓取：现有的 Allow 规则（如果有的话）未覆盖任何内容路径。影响 Gemini 的 grounding，不影响传统 Google 搜索排名。"
+  },
+  {
+    "id": "robots.chatgpt-user",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://example-site-b.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 ChatGPT-User 抓取本站。"
+  },
+  {
+    "id": "robots.claude-user",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://example-site-b.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 Claude-User 抓取本站。"
+  },
+  {
+    "id": "robots.perplexity-user",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://example-site-b.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 Perplexity-User 抓取本站。"
+  },
+  {
+    "id": "robots.applebot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://example-site-b.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 Applebot 抓取本站。"
+  },
+  {
+    "id": "robots.gptbot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://example-site-b.com/robots.txt"
+    },
+    "limitation": "本工具只读取配置，未验证该平台的实际抓取行为是否遵守它。",
+    "observation": "robots.txt 中针对 GPTBot 的规则实质为整站不允许抓取：现有的 Allow 规则（如果有的话）未覆盖任何内容路径。仅用于训练语料采集，不影响 ChatGPT 的引用资格。"
+  },
+  {
+    "id": "robots.applebot-extended",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://example-site-b.com/robots.txt"
+    },
+    "limitation": "本工具只读取配置，未验证该平台的实际抓取行为是否遵守它。",
+    "observation": "robots.txt 中针对 Applebot-Extended 的规则实质为整站不允许抓取：现有的 Allow 规则（如果有的话）未覆盖任何内容路径。仅用于训练语料采集。"
+  },
+  {
+    "id": "robots.amazonbot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://example-site-b.com/robots.txt"
+    },
+    "limitation": "本工具只读取配置，未验证该平台的实际抓取行为是否遵守它。",
+    "observation": "robots.txt 中针对 Amazonbot 的规则实质为整站不允许抓取：现有的 Allow 规则（如果有的话）未覆盖任何内容路径。训练语料。"
+  },
+  {
+    "id": "robots.ccbot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://example-site-b.com/robots.txt"
+    },
+    "limitation": "本工具只读取配置，未验证该平台的实际抓取行为是否遵守它。",
+    "observation": "robots.txt 中针对 CCBot 的规则实质为整站不允许抓取：现有的 Allow 规则（如果有的话）未覆盖任何内容路径。Common Crawl 训练语料。"
+  },
+  {
+    "id": "readability.static-text",
+    "group": "readability",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。静态可读性未测。"
+  },
+  {
+    "id": "structured.jsonld",
+    "group": "structured",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。结构化数据未测。"
+  },
+  {
+    "id": "structured.sameas",
+    "group": "structured",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": false,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。结构化数据未测。"
+  },
+  {
+    "id": "access.canonical",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。canonical 未测。"
+  },
+  {
+    "id": "access.noindex",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。noindex 未测。"
+  },
+  {
+    "id": "metadata.title",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。页面标题未测。"
+  },
+  {
+    "id": "metadata.description",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。页面描述未测。"
+  },
+  {
+    "id": "metadata.h1",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。H1 结构未测。"
+  },
+  {
+    "id": "metadata.lang",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。语言声明未测。"
+  },
+  {
+    "id": "metadata.hreflang",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。hreflang 未测。"
+  },
+  {
+    "id": "metadata.viewport",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。移动端视口未测。"
+  },
+  {
+    "id": "metadata.og",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。Open Graph 未测。"
+  },
+  {
+    "id": "metadata.img-alt",
+    "group": "metadata",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。图片替代文本未测。"
+  },
+  {
+    "id": "access.sitemap",
+    "group": "access",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/sitemap.xml"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。sitemap 未测。"
+  },
+  {
+    "id": "agent.ucp",
+    "group": "agent",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": false,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/.well-known/ucp"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "agent.agents-md",
+    "group": "agent",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": false,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/agents.md"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "agent.llms-txt",
+    "group": "agent",
+    "state": "no_data",
+    "reason": "http_error",
+    "scored": false,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/llms.txt"
+    },
+    "limitation": null,
+    "observation": "对方返回 HTTP 403，本次未取得内容。"
+  },
+  {
+    "id": "performance.psi-score",
+    "group": "performance",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "PageSpeed Insights 移动端性能分 100（满分 100）。"
+  },
+  {
+    "id": "performance.crux-field",
+    "group": "performance",
+    "state": "no_data",
+    "reason": "not_applicable",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": "CrUX 只覆盖有足够真实用户流量的站点，样本不足是常见情况，不代表站点有问题。",
+    "observation": "Chrome 用户体验报告（CrUX）没有该站点的字段数据。"
+  },
+  {
+    "id": "agent.accessibility-tree",
+    "group": "agent",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "浏览器构建出的可访问性树结构完整，AI 代理能据此理解页面结构。"
+  },
+  {
+    "id": "agent.cls",
+    "group": "agent",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://example-site-b.com/home"
+    },
+    "limitation": null,
+    "observation": "累积布局偏移（CLS）实测 0.002。"
+  }
+]

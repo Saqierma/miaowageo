@@ -1,0 +1,448 @@
+[
+  {
+    "id": "robots.oai-searchbot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 OAI-SearchBot 抓取本站。"
+  },
+  {
+    "id": "robots.perplexitybot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 PerplexityBot 抓取本站。"
+  },
+  {
+    "id": "robots.claudebot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 ClaudeBot 抓取本站。"
+  },
+  {
+    "id": "robots.bingbot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 Bingbot 抓取本站。"
+  },
+  {
+    "id": "robots.google-extended",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 Google-Extended 抓取本站。"
+  },
+  {
+    "id": "robots.chatgpt-user",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 ChatGPT-User 抓取本站。"
+  },
+  {
+    "id": "robots.claude-user",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 Claude-User 抓取本站。"
+  },
+  {
+    "id": "robots.perplexity-user",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 Perplexity-User 抓取本站。"
+  },
+  {
+    "id": "robots.applebot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 Applebot 抓取本站。"
+  },
+  {
+    "id": "robots.gptbot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://miaowageo.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 GPTBot 抓取本站。"
+  },
+  {
+    "id": "robots.applebot-extended",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://miaowageo.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 Applebot-Extended 抓取本站。"
+  },
+  {
+    "id": "robots.amazonbot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://miaowageo.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 Amazonbot 抓取本站。"
+  },
+  {
+    "id": "robots.ccbot",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://miaowageo.com/robots.txt"
+    },
+    "limitation": "放开抓取不等于保证收录或引用。",
+    "observation": "robots.txt 未限制 CCBot 抓取本站。"
+  },
+  {
+    "id": "readability.static-text",
+    "group": "readability",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/",
+      "excerpt": "5762 字符"
+    },
+    "limitation": "这是一个技术信号。重要内容是否只在浏览器执行脚本后才出现，需要网站人员确认。",
+    "observation": "不执行 JavaScript 时，该页面可读到约 5762 个字符的正文。"
+  },
+  {
+    "id": "structured.jsonld",
+    "group": "structured",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/"
+    },
+    "limitation": null,
+    "observation": "页面 JSON-LD 中包含主体类型：Organization。"
+  },
+  {
+    "id": "structured.sameas",
+    "group": "structured",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://miaowageo.com/"
+    },
+    "limitation": "sameAs 只作为实体一致性的参考，本工具不对它判定好坏。",
+    "observation": "JSON-LD 中未声明 sameAs。"
+  },
+  {
+    "id": "access.canonical",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/",
+      "canonical": "https://miaowageo.com/"
+    },
+    "limitation": null,
+    "observation": "canonical 自指本页（https://miaowageo.com/）。"
+  },
+  {
+    "id": "access.noindex",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/",
+      "xRobotsTag": null
+    },
+    "limitation": null,
+    "observation": "未发现 noindex 声明（meta robots 与 X-Robots-Tag 均未阻止收录）。"
+  },
+  {
+    "id": "metadata.title",
+    "group": "metadata",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/"
+    },
+    "limitation": null,
+    "observation": "页面标题共 27 个字符：「妙蛙 GEO - 证据型月度 GEO 报告与行动工作台」"
+  },
+  {
+    "id": "metadata.description",
+    "group": "metadata",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/"
+    },
+    "limitation": null,
+    "observation": "meta description 共 51 个字符。"
+  },
+  {
+    "id": "metadata.h1",
+    "group": "metadata",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/"
+    },
+    "limitation": null,
+    "observation": "页面有唯一的 <h1>：「证据型月度 GEO 报告 + 行动工作台」"
+  },
+  {
+    "id": "metadata.lang",
+    "group": "metadata",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/"
+    },
+    "limitation": "本工具只检查是否声明，未核对声明的语言与正文实际语言是否一致。",
+    "observation": "<html lang=\"zh-CN\">。"
+  },
+  {
+    "id": "metadata.hreflang",
+    "group": "metadata",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "warn",
+    "evidence": {
+      "url": "https://miaowageo.com/"
+    },
+    "limitation": "单语言站点无需 hreflang，此项可忽略。若站点有多语言版本，缺失 hreflang 会让各语言版本互相竞争同一批搜索结果。",
+    "observation": "页面未声明 hreflang。"
+  },
+  {
+    "id": "metadata.viewport",
+    "group": "metadata",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/"
+    },
+    "limitation": null,
+    "observation": "页面声明了响应式 viewport。"
+  },
+  {
+    "id": "metadata.og",
+    "group": "metadata",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/"
+    },
+    "limitation": null,
+    "observation": "Open Graph 的标题、描述与配图均已声明。"
+  },
+  {
+    "id": "metadata.img-alt",
+    "group": "metadata",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/"
+    },
+    "limitation": "alt=\"\" 算作已声明——那是装饰性图片的正确写法。本工具不评价 alt 文本的质量，只看是否声明。",
+    "observation": "2 个 <img> 中有 2 个声明了 alt（100%）。"
+  },
+  {
+    "id": "access.sitemap",
+    "group": "access",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/sitemap.xml",
+      "entries": 108
+    },
+    "limitation": null,
+    "observation": "该站点 sitemap.xml 可达，包含约 108 条 URL。"
+  },
+  {
+    "id": "agent.ucp",
+    "group": "agent",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://miaowageo.com/.well-known/ucp"
+    },
+    "limitation": null,
+    "observation": "该站未提供 /.well-known/ucp。UCP 协议目前格局未定，缺失不代表任何问题。"
+  },
+  {
+    "id": "agent.agents-md",
+    "group": "agent",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://miaowageo.com/agents.md"
+    },
+    "limitation": null,
+    "observation": "该站未提供 /agents.md。"
+  },
+  {
+    "id": "agent.llms-txt",
+    "group": "agent",
+    "state": "ready",
+    "reason": null,
+    "scored": false,
+    "verdict": "info",
+    "evidence": {
+      "url": "https://miaowageo.com/llms.txt"
+    },
+    "limitation": null,
+    "observation": "该站未提供 llms.txt。Google 已明确 Search 不使用该文件，缺失不影响搜索可见性，本工具不建议专门为此配置它。"
+  },
+  {
+    "id": "performance.psi-score",
+    "group": "performance",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/"
+    },
+    "limitation": null,
+    "observation": "PageSpeed Insights 移动端性能分 90（满分 100）。"
+  },
+  {
+    "id": "performance.crux-field",
+    "group": "performance",
+    "state": "no_data",
+    "reason": "not_applicable",
+    "scored": true,
+    "verdict": null,
+    "evidence": {
+      "url": "https://miaowageo.com/"
+    },
+    "limitation": "CrUX 只覆盖有足够真实用户流量的站点，样本不足是常见情况，不代表站点有问题。",
+    "observation": "Chrome 用户体验报告（CrUX）没有该站点的字段数据。"
+  },
+  {
+    "id": "agent.accessibility-tree",
+    "group": "agent",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "fail",
+    "evidence": {
+      "url": "https://miaowageo.com/"
+    },
+    "limitation": null,
+    "observation": "浏览器构建出的可访问性树结构不完整（Lighthouse：Accessibility tree is not well-formed）。"
+  },
+  {
+    "id": "agent.cls",
+    "group": "agent",
+    "state": "ready",
+    "reason": null,
+    "scored": true,
+    "verdict": "pass",
+    "evidence": {
+      "url": "https://miaowageo.com/"
+    },
+    "limitation": null,
+    "observation": "累积布局偏移（CLS）实测 0.000。"
+  }
+]
