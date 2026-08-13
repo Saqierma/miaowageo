@@ -1,0 +1,57 @@
+# 每次 push 与 PR 自动跑全量测试。
+#
+# **刻意不跑 `npm install`。** 本仓库零第三方依赖（唯一的 lighthouse 只由
+# src/lighthouse-runner.mjs 以子进程方式调用其 CLI，测试里全部是注入的桩），
+# 374 个测试在没有 node_modules 的情况下全绿。不装依赖有三个好处：
+# 每次 CI 少下载 162MB、供应链风险面为零、以及——**它本身就是一条测试**：
+# 哪天有人偷偷加了个 import，CI 会在这里当场变红。
+#
+# Node 版本按 package.json 的 engines(>=22.13.0) 取两端：22 是生产检测机跑的
+# 版本，24 用来提前发现向前不兼容。声明支持一个范围，就该验证这个范围。
+#
+# 安全：本文件不在任何 run: 里插值不可信输入（issue 标题、PR 描述、commit
+# message 之类）。用到的 ${{ }} 只有写死的 matrix 值与 github.workflow/ref，
+# 后者仅用于 concurrency 分组，不进 shell。
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# 同一分支上新的 push 取消掉还在跑的旧任务，不浪费额度。
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# 只读。这个工作流不需要写仓库的任何权限。
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      # 一个版本红了也要把另一个跑完——否则看不出是版本相关还是普遍失败。
+      fail-fast: false
+      matrix:
+        node: ["22", "24"]
+    name: node ${{ matrix.node }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: 确认无需第三方依赖
+        # 上面那段注释里的承诺，在这里被强制执行：
+        # 哪天真的需要依赖了，这一步会失败，逼人回来把注释一起改掉。
+        run: |
+          if [ -d node_modules ]; then
+            echo "node_modules 不该出现在仓库里" >&2
+            exit 1
+          fi
+
+      - run: npm test

@@ -1,5 +1,10 @@
 # 妙蛙 GEO · miaowageo
 
+[![tests](https://github.com/Saqierma/miaowageo/actions/workflows/test.yml/badge.svg)](https://github.com/Saqierma/miaowageo/actions/workflows/test.yml)
+[![license: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
+[![node](https://img.shields.io/badge/node-%3E%3D22.13.0-brightgreen.svg)](package.json)
+[![dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](package.json)
+
 **免费开源的 GEO 检测工具（生成式引擎优化检测）—— 查一查，你的网站在 ChatGPT、Claude、Perplexity、Gemini 眼里到底存不存在。**
 
 [**立即免费检测 →  miaowageo.com/geocheck**](https://miaowageo.com/geocheck)
@@ -367,7 +372,7 @@ WAF 规则匹配的是 User-Agent，保真度不受影响；而对方查日志�
 
 ### 374 个测试，每一条防线都被变异验证过
 
-`npm test` 跑 374 个测试。更要紧的是：**每一条重要防线都做过变异测试**——把防御代码删掉，确认真的有测试变红。
+`npm test` 跑 374 个测试，每次 push 与 PR 由 GitHub Actions 在 Node 22 与 24 上各跑一遍（上面那个徽章就是它）。更要紧的是：**每一条重要防线都做过变异测试**——把防御代码删掉，确认真的有测试变红。
 
 一个不会变红的测试，是比没有测试更危险的东西：它让人以为那里被守着。
 
@@ -430,6 +435,11 @@ A：不会。轻检查总共只发 7 次请求（预飞规范化、robots.txt、
 ---
 
 # miaowageo · Free Open-Source GEO Checker
+
+[![tests](https://github.com/Saqierma/miaowageo/actions/workflows/test.yml/badge.svg)](https://github.com/Saqierma/miaowageo/actions/workflows/test.yml)
+[![license: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
+[![node](https://img.shields.io/badge/node-%3E%3D22.13.0-brightgreen.svg)](package.json)
+[![dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](package.json)
 
 **A free, open-source GEO (Generative Engine Optimization) checker — find out whether your website actually exists in the eyes of ChatGPT, Claude, Perplexity and Gemini.**
 
@@ -808,7 +818,7 @@ site's crawling rules.
 
 ### 374 tests, and every defence has been mutation-verified
 
-`npm test` runs 374 tests. More importantly, **every significant defence has been mutation-tested** — the defensive code is deleted and we confirm a test actually turns red.
+`npm test` runs 374 tests, and GitHub Actions runs them on Node 22 and 24 on every push and pull request (that is the badge at the top). More importantly, **every significant defence has been mutation-tested** — the defensive code is deleted and we confirm a test actually turns red.
 
 A test that cannot turn red is more dangerous than no test at all: it makes people believe something is guarded.
 
