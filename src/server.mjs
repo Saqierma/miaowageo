@@ -8,6 +8,7 @@ import { assertNoProxyEnv, assertValidOwnPublicIp } from "./fetchers/net-guard.m
 import { runLightAudit as defaultRunLightAudit } from "./orchestrate-light.mjs";
 import { safeFetch as defaultSafeFetch } from "./fetchers/safe-fetch.mjs";
 import { runDeepAudit as defaultRunDeepAudit, DEEP_TIMEOUT_MS, RobotsDisallowedError } from "./orchestrate-deep.mjs";
+import { runProbeAudit as defaultRunProbeAudit } from "./orchestrate-probe.mjs";
 import { startAllowlistProxy as defaultStartAllowlistProxy } from "./proxy/allowlist-proxy.mjs";
 
 /**
@@ -74,6 +75,20 @@ export const MAX_CONCURRENCY = 20;
 //
 // 改这个数之前先看 tests/server.test.mjs 里那条**真的做加法**的断言。
 export const AUDIT_TIMEOUT_MS = 11000;
+
+/**
+ * 探针阶段的硬超时。
+ *
+ * 七个探针 + 一次 robots.txt = 8 个请求，全部串行、共用 safe-fetch 的
+ * 300ms 同源节流：节流铺开约 2.4s，每个请求自身上限 4s。
+ * 最坏路径 2.4 + 4 = 6.4s，取 15s 留足余量。
+ *
+ * **它有自己的并发池，不与深检查共用。** 深检查要起 Chrome、吃 1~2 GB、
+ * 全局只允许一个；而这一阶段只发几个 HTTP 请求。把便宜且高价值的东西
+ * 排在昂贵且稀缺的东西后面没有道理。
+ */
+export const PROBE_TIMEOUT_MS = 15000;
+export const PROBE_MAX_CONCURRENCY = 4;
 
 // 请求体只装一个 URL 字符串；16 KB 已经非常宽松，同时挡掉恶意超大 body
 // 在读完之前就把内存吃满——呼应 safe-fetch.mjs 对响应体设的同类上限。
@@ -179,6 +194,9 @@ export function createRequestListener(deps) {
     runDeepAudit = defaultRunDeepAudit,
     deepTimeoutMs = DEEP_TIMEOUT_MS,
     deepConfig = {},
+    runProbeAudit = defaultRunProbeAudit,
+    probeTimeoutMs = PROBE_TIMEOUT_MS,
+    probeMaxConcurrency = PROBE_MAX_CONCURRENCY,
   } = deps ?? {};
 
   if (!token) {
@@ -186,6 +204,8 @@ export function createRequestListener(deps) {
   }
 
   const gate = createConcurrencyGate(maxConcurrency);
+  // 探针阶段独立的池：见 PROBE_TIMEOUT_MS 的注释。
+  const probeGate = createConcurrencyGate(probeMaxConcurrency);
 
   return async function requestListener(req, res) {
     // 匿名公开端点，任何人都能连上来又中途掐断连接。req/res 在客户端异常断开时
@@ -197,8 +217,9 @@ export function createRequestListener(deps) {
 
     const isLight = req.method === "POST" && req.url === "/audit/light";
     const isDeep = req.method === "POST" && req.url === "/audit/deep";
+    const isProbe = req.method === "POST" && req.url === "/audit/probe";
 
-    if (!isLight && !isDeep) {
+    if (!isLight && !isDeep && !isProbe) {
       sendJson(res, 404, { ok: false, reason: "not_found" });
       return;
     }
@@ -216,7 +237,7 @@ export function createRequestListener(deps) {
       return;
     }
 
-    const release = gate.acquire();
+    const release = (isProbe ? probeGate : gate).acquire();
     if (!release) {
       sendJson(res, 503, { ok: false, reason: "capacity" });
       return;
@@ -261,6 +282,14 @@ export function createRequestListener(deps) {
           const result = await runDeepAudit(url, { ...deepConfig, robotsAllowedPage });
           return { ok: true, result };
         }
+        if (isProbe) {
+          // 探针自己抓 robots.txt 并逐路径求值（见 orchestrate-probe.mjs）——
+          // 与深检查不同，这里不需要调用方传 robotsAllowedPage：
+          // 深检查那条要求成立的前提是「浏览器 UA 不受我们控制」，
+          // 而探针的每一个 UA 都是我们自己选的，可以自己先读规则。
+          const result = await runProbeAudit(url, { safeFetch });
+          return { ok: true, result };
+        }
         const result = await runLightAudit(url, { safeFetch });
         return { ok: true, result };
       } catch (err) {
@@ -269,7 +298,7 @@ export function createRequestListener(deps) {
     })();
     auditPromise.finally(release);
 
-    const { promise: timeoutPromise, cancel } = timeoutAfter(isDeep ? deepTimeoutMs : timeoutMs);
+    const { promise: timeoutPromise, cancel } = timeoutAfter(isDeep ? deepTimeoutMs : isProbe ? probeTimeoutMs : timeoutMs);
     const winner = await Promise.race([
       auditPromise.then((outcome) => ({ kind: "settled", outcome })),
       timeoutPromise.then(() => ({ kind: "timeout" })),
@@ -294,7 +323,7 @@ export function createRequestListener(deps) {
     if (!winner.outcome.ok) {
       // 记下来，否则一个真实的内部 bug 会在响应里坍缩成同一句「worker_error」
       // 悄悄消失，运维除了状态码分布什么都看不到。
-      console.error(`[audit] ${isDeep ? "runDeepAudit" : "runLightAudit"} 内部异常：`, winner.outcome.error);
+      console.error(`[audit] ${isDeep ? "runDeepAudit" : isProbe ? "runProbeAudit" : "runLightAudit"} 内部异常：`, winner.outcome.error);
       sendJson(res, 500, { ok: false, reason: "worker_error", results: [] });
       return;
     }
@@ -397,7 +426,7 @@ export function assertDeepCheckConfig(env) {
 
 /**
  * 启动 HTTP 服务。assertNoProxyEnv / assertValidOwnPublicIp 必须是这里最先做的事，
- * 且必须是同步的、在创建/监听任何端口之前——经代理出网会绕过 SSRF 判定，代理
+ * 且必须是同步的、在创建/监听任何端口之前——本服务与 sing-box 共享主机，代理
  * 环境变量存在、或本机公网 IP 配错时，私网防线不可靠（详见 net-guard.mjs 顶部
  * 与 assertValidOwnPublicIp 的注释），宁可拒绝启动也不要带病运行。
  *

@@ -462,3 +462,70 @@ test("C3-4：钉死 IPv6 地址时 family 报 6，不是硬编码的 4", () => {
   lookup("v6.example", { all: true }, (err, result) => seen.push([err, result]));
   assert.deepEqual(seen, [[null, [{ address: "2606:2800:220:1:248:1893:25c8:1946", family: 6 }]]]);
 });
+
+// ---------------------------------------------------------------------------
+// 自定义 UA：UA 差分探针的底层能力
+// ---------------------------------------------------------------------------
+
+test("**userAgent 选项真的改到线上发出的请求头，不是被默认值盖掉**", async () => {
+  // 这条通道是整个 UA 差分矩阵的地基。它悄悄失效的表现是：
+  // 七个探针发的其实是同一个 UA，于是矩阵七行状态码全一样、
+  // 看起来「该站不做 UA 区分」——一个完全错误、却毫无异常表现的结论。
+  const seen = [];
+  const fakeTransport = async (url, opts) => {
+    seen.push(opts?.userAgent);
+    return fakeResponse({ statusCode: 200, body: "ok" });
+  };
+
+  await safeFetch("https://x.example/", {
+    allowPrivate: true,
+    resolve: async () => [{ address: "93.184.216.34", family: 4 }],
+    transport: fakeTransport,
+    userAgent: "GPTBot/1.2",
+  });
+  assert.deepEqual(seen, ["GPTBot/1.2"]);
+
+  // 不传时必须仍是本产品的出站身份——默认行为不得因为加了这个选项而改变。
+  seen.length = 0;
+  await safeFetch("https://x.example/", {
+    allowPrivate: true,
+    resolve: async () => [{ address: "93.184.216.34", family: 4 }],
+    transport: fakeTransport,
+  });
+  assert.deepEqual(seen, [undefined], "不传 userAgent 时不得凭空造一个出来");
+});
+
+test("extraHeaders 能加头，但**不得篡改 host**", async () => {
+  // host 头必须仍是判定过的那个主机名。允许调用方覆盖它，等于给连接钉死
+  // 开了一个后门：连的是判定过的 IP，Host 却指向别处。
+  //
+  // **必须起一个真实服务器来看实际收到的头。** 第一版是在测试里把合并顺序
+  // 重新实现一遍再断言——那测的是测试自己，不是 performRequest。
+  const { createServer } = await import("node:http");
+  const received = [];
+  const server = createServer((req, res) => {
+    received.push(req.headers);
+    res.writeHead(200, { "content-type": "text/plain" });
+    res.end("ok");
+  });
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const port = server.address().port;
+
+  try {
+    const res = await performRequest(new URL(`http://127.0.0.1:${port}/probe`), {
+      signal: AbortSignal.timeout(3000),
+      userAgent: "curl/8.4.0",
+      extraHeaders: { "x-probed-by": "MiaowaGEO-Audit", host: "evil.example" },
+    });
+    res.resume();
+    await new Promise((r) => res.on("end", r));
+  } finally {
+    server.close();
+  }
+
+  assert.equal(received.length, 1);
+  const h = received[0];
+  assert.equal(h["user-agent"], "curl/8.4.0", "UA 必须是调用方指定的那个");
+  assert.equal(h["x-probed-by"], "MiaowaGEO-Audit", "额外头要真的发出去");
+  assert.equal(h.host, `127.0.0.1:${port}`, "host 必须由 performRequest 掌管，不得被 extraHeaders 覆盖");
+});

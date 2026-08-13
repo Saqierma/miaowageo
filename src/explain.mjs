@@ -557,6 +557,66 @@ export const CHECK_EXPLANATIONS = Object.freeze({
         "under the performance score item above.",
     },
   },
+
+  // ── UA 差分矩阵与 WAF 指纹 ─────────────────────────────────────────
+  "access.ua-matrix": {
+    zh: {
+      what:
+        "同一个页面、同一时刻、从同一台机器，分别用普通浏览器、curl、Googlebot、" +
+        "以及各家 AI 爬虫的身份各请求一次，看服务器分别回什么状态码。" +
+        "一张表就能看出：**是所有人都进得来，还是只有某几种身份被挡在门外。**",
+      risk:
+        "如果只有 AI 爬虫的身份被拒绝，那你的网站在这几家 AI 眼里等于不存在——" +
+        "而从浏览器里看一切正常，你不会有任何察觉。这类拦截通常来自 CDN 或 WAF 的" +
+        "机器人防护，不是网站程序本身的问题。",
+      fix:
+        "先看下面那条「该站点前面有 XX」，按对应的控制台路径去检查机器人放行设置。" +
+        "另外**建议在服务器访问日志里核对这几个 User-Agent 的真实响应码**——" +
+        "那是唯一能百分百确认的方式，本工具只能从外部观察。",
+    },
+    en: {
+      what:
+        "The same page, at the same moment, from the same machine, requested once each as an ordinary browser, " +
+        "as curl, as Googlebot, and as each of the major AI crawlers — showing what status code the server returns to each. " +
+        "One table answers the question: **does everyone get in, or are only certain identities turned away?**",
+      risk:
+        "If only the AI crawler identities are refused, your site effectively does not exist inside those AI systems — " +
+        "while everything looks perfectly fine in a browser, so nothing alerts you. Blocking of this kind usually comes " +
+        "from bot protection in a CDN or WAF rather than from the site software itself.",
+      fix:
+        "Start with the vendor line below and follow that console path to check the bot-allowlist settings. " +
+        "**Also verify the real status codes for these User-Agents in your own server access logs** — that is the only " +
+        "way to be certain; this tool can only observe from the outside.",
+    },
+  },
+  "access.waf-vendor": {
+    zh: {
+      what:
+        "从服务器返回的响应头里，识别你的网站前面挂的是哪家 CDN 或 Web 应用防火墙（WAF）。" +
+        "这些产品负责拦机器人，AI 爬虫被挡住时，绝大多数情况是它们干的，而不是网站程序。",
+      risk:
+        "这一项**不计分**，认出厂商本身既不加分也不扣分。它存在的意义只有一个：" +
+        "把「这项要找开发」变成「进控制台点这三下」。",
+      fix:
+        "上面那条观测里写了识别结果与依据；具体到哪个菜单，见那一条下面的说明。" +
+        "**认不出厂商时我们不猜**——可能是没用这类产品、用了但关了标识头、" +
+        "或者是本工具还不认识的厂商，这三种情况从外部分辨不出来。",
+    },
+    en: {
+      what:
+        "Identifies which CDN or Web Application Firewall sits in front of your site, based on the response headers " +
+        "the server returns. These products are what block bots — when an AI crawler is turned away, they are almost " +
+        "always the cause rather than the site software.",
+      risk:
+        "This item is **not scored**: recognising a vendor neither helps nor hurts. It exists for one reason only — " +
+        "to turn \"ask a developer\" into \"click these three things in your console\".",
+      fix:
+        "The observation above states what was identified and on what evidence; the console path is in the note beneath it. " +
+        "**When no vendor can be identified we do not guess** — it may be that no such product is in use, that it is in use " +
+        "with its identifying headers turned off, or that it is a vendor this tool does not yet recognise. " +
+        "Those three cases are indistinguishable from the outside.",
+    },
+  },
 });
 
 /** 把任意输入收敛成受支持的语言，非法值一律回落中文。 */

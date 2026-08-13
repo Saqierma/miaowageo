@@ -790,3 +790,96 @@ test("startServer 真的调用了 TLS 断言（接线）", () => {
   const { MIAOWA_AUDIT_TLS, ...withoutTls } = MINIMAL_ENV;
   assertStartupRejected(withoutTls, /MIAOWA_AUDIT_TLS/);
 });
+
+// ---------------------------------------------------------------------------
+// /audit/probe：UA 差分矩阵阶段
+// ---------------------------------------------------------------------------
+
+async function postTo(base, path, body, headers = {}) {
+  const res = await fetch(`${base}${path}`, {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: `Bearer ${TOKEN}`, ...headers },
+    body: JSON.stringify(body),
+  });
+  return { status: res.status, json: await res.json().catch(() => null) };
+}
+
+test("/audit/probe 返回矩阵与厂商", async () => {
+  await withTestServer(
+    { runProbeAudit: async () => ({ results: [{ id: "access.ua-matrix" }], matrix: [{ id: "chrome", status: 200 }], vendor: { id: "cloudflare" } }) },
+    async (base) => {
+      const { status, json } = await postTo(base, "/audit/probe", { url: "https://x.example/" });
+      assert.equal(status, 200);
+      assert.equal(json.ok, true);
+      assert.equal(json.matrix[0].status, 200);
+      assert.equal(json.vendor.id, "cloudflare");
+    },
+  );
+});
+
+test("/audit/probe 同样要鉴权", async () => {
+  await withTestServer({ runProbeAudit: async () => ({ results: [] }) }, async (base) => {
+    const res = await fetch(`${base}/audit/probe`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ url: "https://x.example/" }),
+    });
+    assert.equal(res.status, 401);
+  });
+});
+
+test("**/audit/probe 不需要传 robotsAllowedPage**——它自己读规则", async () => {
+  // 深检查要求调用方传，是因为浏览器 UA 不受我们控制；
+  // 而探针的每一个 UA 都是我们自己选的，可以自己先读 robots。
+  await withTestServer({ runProbeAudit: async () => ({ results: [], matrix: [] }) }, async (base) => {
+    const { status, json } = await postTo(base, "/audit/probe", { url: "https://x.example/" });
+    assert.equal(status, 200);
+    assert.equal(json.ok, true);
+  });
+});
+
+test("**探针有独立并发池，不与轻检查抢槽位**", async () => {
+  // 便宜且高价值的东西排在昂贵的东西后面没有道理。
+  // 把轻检查的池压到 1 并占满，探针仍然要能进来。
+  let releaseLight;
+  const lightBlocker = new Promise((r) => { releaseLight = r; });
+  await withTestServer(
+    {
+      maxConcurrency: 1,
+      runLightAudit: async () => { await lightBlocker; return { results: [] }; },
+      runProbeAudit: async () => ({ results: [], matrix: [{ id: "chrome", status: 200 }] }),
+    },
+    async (base) => {
+      const light = postTo(base, "/audit/light", { url: "https://x.example/" });
+      await new Promise((r) => setTimeout(r, 30)); // 让轻检查先占住那唯一的槽位
+      const probe = await postTo(base, "/audit/probe", { url: "https://x.example/" });
+      assert.equal(probe.status, 200, "轻检查池满不该挡住探针");
+      assert.equal(probe.json.ok, true);
+      releaseLight();
+      await light;
+    },
+  );
+});
+
+test("**探针用自己的 15s 预算，不是轻检查的 11s**", async () => {
+  // 七个探针串行 + 300ms 同源节流，最坏路径约 6.4s；轻检查的预算是按
+  // 「用户同步等待」定的 11s，两者本来就不该共用一个数。
+  // 用一个「比轻检查预算长、比探针预算短」的耗时来分辨：
+  // 若探针误用了轻检查的超时，这次会被截断成 worker_error。
+  await withTestServer(
+    {
+      timeoutMs: 40,          // 轻检查预算：很短
+      probeTimeoutMs: 400,    // 探针预算：长得多
+      runProbeAudit: async () => {
+        await new Promise((r) => setTimeout(r, 150)); // 夹在两者之间
+        return { results: [], matrix: [{ id: "chrome", status: 200 }] };
+      },
+    },
+    async (base) => {
+      const { status, json } = await postTo(base, "/audit/probe", { url: "https://x.example/" });
+      assert.equal(status, 200);
+      assert.equal(json.ok, true, "探针被轻检查的短预算截断了——说明超时选错了那一个");
+      assert.equal(json.matrix[0].status, 200);
+    },
+  );
+});

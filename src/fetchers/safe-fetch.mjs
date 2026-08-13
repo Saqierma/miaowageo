@@ -311,7 +311,7 @@ export function makePinnedLookup(address) {
  * 的任何返回值，只有直接调用这一层、用一个**保证永不解析**的主机名
  * （RFC 2606 的 `.invalid`）当靶子，"钉死失效"才会表现为一个失败的测试。
  */
-export function performRequest(targetUrl, { pinnedAddress, signal }) {
+export function performRequest(targetUrl, { pinnedAddress, signal, userAgent, extraHeaders } = {}) {
   return new Promise((resolvePromise, reject) => {
     const isHttps = targetUrl.protocol === "https:";
     const mod = isHttps ? httpsRequest : httpRequest;
@@ -322,8 +322,14 @@ export function performRequest(targetUrl, { pinnedAddress, signal }) {
       port,
       path: `${targetUrl.pathname}${targetUrl.search}`,
       headers: {
+        // 额外头先铺，下面两个由本函数掌管的头覆盖它——
+        // 调用方不得通过 extraHeaders 篡改 host（那会绕过连接钉死的语义：
+        // 我们连的是判定过的 IP，Host 头必须仍然是判定时的那个主机）。
+        ...(extraHeaders ?? {}),
         host: targetUrl.host,
-        "user-agent": OUTBOUND_USER_AGENT,
+        // 默认仍是本产品的出站身份。只有 UA 差分探针会显式覆盖它，
+        // 理由见 src/probe/ua-matrix.mjs 的头注释。
+        "user-agent": userAgent ?? OUTBOUND_USER_AGENT,
       },
       signal,
       agent: false,
@@ -479,6 +485,11 @@ export async function safeFetch(url, options = {}) {
     throttleIntervalMs = defaultThrottleIntervalMs,
     resolve,
     transport = performRequest,
+    // UA 差分探针用：换一个出站身份，其余一切不变。
+    // **连接钉死、私网判定、节流、重定向上限一概不因为换 UA 而放松**——
+    // 那些是防线，与我们自称是谁无关。
+    userAgent,
+    extraHeaders,
   } = options;
 
   let currentUrl;
@@ -520,7 +531,7 @@ export async function safeFetch(url, options = {}) {
     // DNS 解析，DNS-rebinding 没有可乘之机。
     let res;
     try {
-      res = await transport(currentUrl, { pinnedAddress: hop.pinnedAddress, signal });
+      res = await transport(currentUrl, { pinnedAddress: hop.pinnedAddress, signal, userAgent, extraHeaders });
     } catch (err) {
       return failure(isAbortLike(err, signal) ? "timeout" : "network", currentUrl.href);
     }

@@ -6,7 +6,7 @@
 
 [English below ↓](#miaowageo--free-open-source-geo-checker)
 
-> 无需注册、不留邮箱、不留手机号。从海外检测点发起，26 项技术检查，每一条结论都附证据与边界。
+> 无需注册、不留邮箱、不留手机号。从海外检测点发起，27 项技术检查，每一条结论都附证据与边界。
 
 ![妙蛙 GEO 检测工具首页](docs/screenshot-geocheck.png)
 
@@ -92,7 +92,7 @@
 
 ## 四、它到底检查什么
 
-**26 个计分项，分 6 组。** 全部是可验证的技术事实，不含任何主观打分。
+**27 个计分项，分 6 组。** 全部是可验证的技术事实，不含任何主观打分。
 
 ### 1. AI 搜索准入检测（robots.txt 逐个爬虫判定）
 
@@ -143,6 +143,80 @@ JSON-LD 与主体类型（Organization / Product / Article 等）、`sameAs` 声
 
 Google PageSpeed Insights 移动端性能分、CrUX 真实用户字段数据、累积布局偏移（CLS）。
 
+### 7. User-Agent 差分矩阵：同一时刻，换七种身份各访问一次
+
+`robots.txt` 写了允许，不等于爬虫真的进得来。**大量拦截发生在 CDN 与 WAF 那一层，
+`robots.txt` 根本管不着。** 而这种拦截从浏览器里完全看不出来——你的网站在你眼里一切正常。
+
+所以我们对同一个页面、**同一台机器、同一个出口 IP、同一个时刻**，只改 User-Agent，
+串行发七个请求：
+
+| 身份 | 它代表什么 |
+| --- | --- |
+| Chrome | 基线：真人用浏览器看到什么 |
+| curl | 泛化的非浏览器客户端 |
+| **Googlebot** | **对照组（关键，见下）** |
+| GPTBot | OpenAI 的训练与抓取爬虫 |
+| OAI-SearchBot | ChatGPT 搜索的抓取爬虫 |
+| ClaudeBot | Anthropic 的爬虫 |
+| PerplexityBot | Perplexity 的爬虫 |
+
+变量只有一个，所以结论很硬：**有身份被单独挡下，说明拦截就是按客户端身份做的。**
+
+这是 2026-08-13 对 `nytimes.com` 的一次真实测量：
+
+| 以什么身份访问 | 服务器回应 |
+| --- | --- |
+| Chrome（普通浏览器） | `200` |
+| curl（泛化非浏览器客户端） | `200` |
+| Googlebot（对照） | `200` |
+| OAI-SearchBot | **`403`** |
+| GPTBot | **`403`** |
+| ClaudeBot | **`403`** |
+| PerplexityBot | **`403`** |
+
+> 判定：**该站点存在针对 AI 爬虫的准入规则。** 识别出的厂商：Fastly。
+
+#### 为什么必须有 Googlebot 这个对照组
+
+这是这项检查里最要紧的一个设计，也是我们**唯一一处主动给自己找麻烦**的地方。
+
+我们的检测点不在 OpenAI、Anthropic 公布的爬虫 IP 段里。Cloudflare 的 Verified Bots
+这类机制会做反向 DNS 校验，**正确地**拒绝我们这个未经验证的 GPTBot 声明——
+而真正的 GPTBot 会被放行。
+
+也就是说，**「我们的 GPTBot 探针拿到 403」并不能直接证明真 GPTBot 被拦。**
+不处理这一条，这个功能会系统性地冤枉一批配置完全正确的网站。
+
+Googlebot 当对照能把两种情况分开——几乎没有人会故意封 Googlebot：
+
+| Chrome | Googlebot | GPTBot | 能下的结论 |
+| --- | --- | --- | --- |
+| 200 | 200 | **403** | **确实存在针对 AI 爬虫的规则。**结论扎实：若做身份校验，仿冒的 Googlebot 也会一起被拦 |
+| 200 | **403** | **403** | 该站在做**已验证机器人**校验，拦的是「未经验证的声明」。**真 GPTBot 可能进得去，我们测不出来**——报告里会明说无法判定 |
+| 200 | 200 | 200 | 这一层没有拦截 |
+| **403** | — | — | 连普通浏览器都进不来，多半是 TLS 指纹或 JS 质询。这张矩阵在这种站上测不出东西，报告里也会明说 |
+
+第二行和第四行都会**如实报告「我们无法判定」**，而不是给一个看起来很确定的结论。
+这与本项目「没测到 ≠ 不合格」是同一条原则。
+
+判定逻辑在 [`src/probe/ua-matrix.mjs`](src/probe/ua-matrix.mjs)，四种组合各有测试守着。
+
+#### 认出 CDN / WAF 厂商，把「要找开发」变成「点这三下」
+
+报告里最没用的一句话是「这项要找开发」。而绝大多数 AI 爬虫拦截来自 Cloudflare、
+Akamai、阿里云 WAF 这类**有固定后台、菜单路径明确**的产品——认出厂商，就能直接给路径。
+
+指纹是纯函数，**零额外请求**，读的就是上面七个探针已经拿到的响应头
+（[`src/probe/waf-fingerprint.mjs`](src/probe/waf-fingerprint.mjs)）。这一项**不计分**：
+用了 Cloudflare 既不加分也不扣分，它只是「怎么改」这条信息的载体。
+
+两条自我约束：
+
+- **认不出厂商时说「未能识别」，不猜。** 没命中可能是没用这类产品、用了但关了标识头、
+  或者是我们还不认识的厂商——这三种从外部分辨不出来。
+- **没核实过菜单路径的厂商，不编路径。** 把用户送进一个不存在的菜单，比诚实地说不知道更糟。
+
 ### 真实报告长什么样
 
 [`cases/`](cases/) 目录里有 **8 份真实的检测报告**，包括：
@@ -155,6 +229,9 @@ Google PageSpeed Insights 移动端性能分、CrUX 真实用户字段数据、�
 | [本工具自己的站点](cases/08-miaowageo.md) | **包括它自己没通过的那一项** |
 
 用户提交的站点已匿名（只换域名，其余数据一字未改），理由写在 [`cases/README.md`](cases/README.md#关于匿名)。
+
+> 这 8 份报告生成于 UA 差分矩阵上线之前，所以里面写的是「26 项」而不是现在的 27 项，
+> 也没有那张矩阵表。它们是**当时的真实测量**，我们不回头改数字。
 
 ---
 
@@ -197,6 +274,8 @@ Google PageSpeed Insights 移动端性能分、CrUX 真实用户字段数据、�
 > **一个真实的例子。** 某站点向我们的抓取器返回 403，26 项里 17 项无从判定。而同一台机器上的无头浏览器（用普通浏览器 User-Agent）**成功加载了页面**。同一个出口 IP、同一时刻，只差一个 User-Agent——这强烈提示拦截是**按 User-Agent 判定**的。而 GPTBot、ClaudeBot、PerplexityBot 走的正是「自报 User-Agent」这条路，很可能遇到同样的拒绝。
 >
 > 这个站的老板从浏览器里看，网站一切正常。
+>
+> 这件事当初是手工比对发现的。现在它是一项常规检查——见上面的 §四.7。
 
 ### 原则四：**每一项都用大白话讲清楚「这是什么、怎么改」**
 
@@ -229,7 +308,7 @@ Google PageSpeed Insights 移动端性能分、CrUX 真实用户字段数据、�
   不做才是对的——不说清楚，等于让做对了的人去修一个不存在的问题。
 - **`llms.txt` 如实说「Google 已明确不使用」。** 大量 GEO 文章把它吹成必做项。
 
-这一层在 [`src/explain.mjs`](src/explain.mjs)，34 项检查的文案全在里面，纯数据、零依赖。
+这一层在 [`src/explain.mjs`](src/explain.mjs)，全部检查的文案全在里面，纯数据、零依赖。
 
 ---
 
@@ -263,9 +342,32 @@ Google PageSpeed Insights 移动端性能分、CrUX 真实用户字段数据、�
 
 Worker 用自签证书、按 IP 被调用，公共 CA 体系在这里失去意义。改用证书指纹固定回答唯一真正重要的问题：**我连上的这台，是不是我认识的那台？**
 
-### 324 个测试，每一条防线都被变异验证过
+### 三个阶段，三个独立的并发池
 
-`npm test` 跑 324 个测试。更要紧的是：**每一条重要防线都做过变异测试**——把防御代码删掉，确认真的有测试变红。
+轻检查、深检查、UA 差分探针跑在三个阶段里，**各有各的容量**：
+
+| 阶段 | 成本 | 并发 | 为什么这么定 |
+| --- | --- | --- | --- |
+| 轻检查 | 几个 HTTP 请求 | 用户同步等待 | 硬超时 11s，最坏路径已用掉 10.7s——**没有余量再塞东西进去** |
+| 深检查 | 起 Chrome，吃 1~2 GB | **全局 1** | 内存是硬约束，多开一个就 OOM |
+| UA 探针 | 8 个 HTTP 请求 | 4 | 便宜，不该排在昂贵的东西后面 |
+
+探针刻意**不并进深检查**：把一个只发几个 HTTP 请求的阶段，排在一个要起浏览器、
+全局只允许跑一个的阶段后面，是没有道理的。两者并行触发，各走各的池。
+
+探针也刻意**不并进轻检查**：那是用户盯着屏幕等的，预算已经用满。
+
+对目标站点这一侧，探针是**串行**发出的，共用同一套 300ms 同源节流。
+七个请求同时打一个站，从对方运维的视角看就像一次攻击。
+
+另外，虽然 UA 字符串是完全仿冒的，我们仍然额外发一个
+`X-Probed-By: MiaowaGEO-Audit (+https://miaowageo.com/geocheck)` 头。
+WAF 规则匹配的是 User-Agent，保真度不受影响；而对方查日志时能看清是谁在探测。
+**遵守 `robots.txt` 也照旧**——换一个 UA 去探测，不等于可以无视对方的抓取规则。
+
+### 374 个测试，每一条防线都被变异验证过
+
+`npm test` 跑 374 个测试。更要紧的是：**每一条重要防线都做过变异测试**——把防御代码删掉，确认真的有测试变红。
 
 一个不会变红的测试，是比没有测试更危险的东西：它让人以为那里被守着。
 
@@ -273,7 +375,7 @@ Worker 用自签证书、按 IP 被调用，公共 CA 体系在这里失去意�
 git clone https://github.com/Saqierma/miaowageo.git
 cd miaowageo
 npm install        # 只装 lighthouse
-npm test           # 324 个测试
+npm test           # 374 个测试
 ```
 
 需要 Node.js >= 22.13.0。部署见 [`deploy/README.md`](deploy/README.md)。
@@ -333,7 +435,7 @@ A：不会。轻检查总共只发 7 次请求（预飞规范化、robots.txt、
 
 [**Run a free check →  miaowageo.com/geocheck**](https://miaowageo.com/geocheck)
 
-> No sign-up, no email, no phone number. Requests originate from an overseas checkpoint. 26 technical checks, every conclusion shipped with its evidence *and its limits*.
+> No sign-up, no email, no phone number. Requests originate from an overseas checkpoint. 27 technical checks, every conclusion shipped with its evidence *and its limits*.
 
 ![miaowageo GEO checker](docs/screenshot-geocheck.png)
 
@@ -419,7 +521,7 @@ Check from the wrong place and you've measured your own network, not the AI's po
 
 ## 4. What it actually checks
 
-**26 scored checks across 6 groups.** All verifiable technical facts. No subjective scoring anywhere.
+**27 scored checks across 6 groups.** All verifiable technical facts. No subjective scoring anywhere.
 
 ### 4.1 AI search access (per-crawler `robots.txt` evaluation)
 
@@ -465,6 +567,89 @@ JSON-LD and primary entity types (Organization / Product / Article), plus `sameA
 
 Google PageSpeed Insights mobile score, CrUX field data, Cumulative Layout Shift.
 
+### 4.7 The User-Agent differential matrix: seven identities, one moment
+
+`robots.txt` saying *allowed* does not mean the crawler actually gets in. **A great deal of
+blocking happens at the CDN or WAF layer, where `robots.txt` has no authority at all.**
+And that kind of blocking is invisible from a browser — your site looks perfectly fine to you.
+
+So we request the same page **from the same machine, the same egress IP, at the same moment**,
+changing nothing but the User-Agent — seven requests, issued serially:
+
+| Identity | What it stands for |
+| --- | --- |
+| Chrome | Baseline: what a human in a browser sees |
+| curl | Non-browser clients in general |
+| **Googlebot** | **The control probe (crucial — see below)** |
+| GPTBot | OpenAI's training and crawling agent |
+| OAI-SearchBot | The crawler behind ChatGPT search |
+| ClaudeBot | Anthropic's crawler |
+| PerplexityBot | Perplexity's crawler |
+
+Exactly one variable changes, so the conclusion is firm: **if particular identities are singled
+out and refused, the blocking is being done on client identity.**
+
+A real measurement of `nytimes.com`, 2026-08-13:
+
+| Requesting as | Server responded |
+| --- | --- |
+| Chrome (ordinary browser) | `200` |
+| curl (generic non-browser client) | `200` |
+| Googlebot (control) | `200` |
+| OAI-SearchBot | **`403`** |
+| GPTBot | **`403`** |
+| ClaudeBot | **`403`** |
+| PerplexityBot | **`403`** |
+
+> Verdict: **this site enforces access rules aimed at AI crawlers.** Vendor identified: Fastly.
+
+#### Why the Googlebot control probe is not optional
+
+This is the most important design decision in the whole check, and the one place where we
+deliberately make life harder for ourselves.
+
+Our checkpoint is not inside the crawler IP ranges published by OpenAI or Anthropic.
+Mechanisms like Cloudflare's Verified Bots perform reverse-DNS validation and **correctly**
+refuse our unverified claim to be GPTBot — while admitting the real GPTBot.
+
+Which means: **"our GPTBot probe got a 403" does not by itself prove the real GPTBot is blocked.**
+Ignore this, and the feature would systematically accuse correctly-configured sites.
+
+Using Googlebot as a control separates the two cases — almost nobody blocks Googlebot on purpose:
+
+| Chrome | Googlebot | GPTBot | What can be concluded |
+| --- | --- | --- | --- |
+| 200 | 200 | **403** | **Rules aimed at AI crawlers do exist.** Solid: if identity verification were in play, a spoofed Googlebot would have been refused too |
+| 200 | **403** | **403** | The site is doing **verified-bot** checking and refusing *unverified claims*. **The real GPTBot may well get in; we cannot tell** — and the report says exactly that |
+| 200 | 200 | 200 | Nothing is being blocked at this layer |
+| **403** | — | — | Even an ordinary browser is refused — likely TLS fingerprinting or a JS challenge. This matrix cannot measure such sites, and the report says so |
+
+Rows two and four both report **"we cannot determine this"** rather than manufacturing a
+confident-looking verdict. Same principle as everywhere else in this project: *not measured*
+is never the same as *failed*.
+
+The interpretation logic lives in [`src/probe/ua-matrix.mjs`](src/probe/ua-matrix.mjs); each of
+the four combinations has a test guarding it.
+
+#### Identifying the CDN / WAF vendor turns "ask a developer" into "click these three things"
+
+The least useful sentence a report can contain is "ask a developer". Yet most AI-crawler
+blocking comes from Cloudflare, Akamai, Alibaba Cloud WAF and similar products — all of which
+have a fixed console with a known menu path. Identify the vendor and you can hand over the path.
+
+The fingerprinting is a pure function with **zero extra requests**: it reads the response headers
+the seven probes already collected ([`src/probe/waf-fingerprint.mjs`](src/probe/waf-fingerprint.mjs)).
+The item is **not scored** — using Cloudflare neither helps nor hurts; it exists purely as the
+carrier for the "how to fix it" information.
+
+Two self-imposed constraints:
+
+- **When no vendor can be identified we say so, and do not guess.** No match may mean no such
+  product, a product with its identifying headers turned off, or a vendor we don't yet know.
+  Those three are indistinguishable from the outside.
+- **For vendors whose console we have not verified, we do not invent a menu path.** Sending
+  someone into a menu that does not exist is worse than honestly saying we don't know.
+
 ### What a real report looks like
 
 [`cases/`](cases/) contains **8 real audit reports**, including:
@@ -478,6 +663,10 @@ Google PageSpeed Insights mobile score, CrUX field data, Cumulative Layout Shift
 
 Sites submitted by users are anonymised — the domain is replaced, nothing else is touched.
 Reasoning in [`cases/README.md`](cases/README.md#关于匿名).
+
+> These 8 reports predate the User-Agent differential matrix, so they say "26 checks" rather
+> than today's 27 and contain no matrix table. They are **what was actually measured at the
+> time**, and we do not go back and edit the numbers.
 
 ---
 
@@ -518,6 +707,8 @@ The report therefore distinguishes three kinds of "not measured":
 Collapsing all three into one grey "not measured" leaves the reader unable to answer "is this good or bad" — and the correct answer is "neither, but one of them needs your attention today."
 
 > **A real example.** A site returned 403 to our fetcher; 17 of 26 checks became undeterminable. Yet a headless browser **on the same machine, from the same egress IP, at the same moment** loaded the page successfully — differing only in User-Agent. That strongly indicates User-Agent-based blocking. GPTBot, ClaudeBot and PerplexityBot all announce their own User-Agents and would very likely hit the same wall.
+>
+> That was originally found by hand. It is now a routine check — see §4.7 above.
 >
 > From the owner's browser, that site looked completely fine.
 
@@ -588,9 +779,36 @@ Anyone can submit any URL and we will genuinely connect to it. The defences are 
 
 The worker uses a self-signed certificate and is called by IP, which makes public PKI meaningless here. Fingerprint pinning answers the only question that matters: **is the machine I just connected to the machine I know?**
 
-### 324 tests, and every defence has been mutation-verified
+### Three stages, three independent concurrency pools
 
-`npm test` runs 324 tests. More importantly, **every significant defence has been mutation-tested** — the defensive code is deleted and we confirm a test actually turns red.
+The light check, the deep check and the User-Agent probe run as three stages, **each with its
+own capacity**:
+
+| Stage | Cost | Concurrency | Why |
+| --- | --- | --- | --- |
+| Light check | A few HTTP requests | User waits synchronously | 11s hard timeout, worst path already consumes 10.7s — **no headroom for anything more** |
+| Deep check | Launches Chrome, 1–2 GB | **1 globally** | Memory is the hard constraint; one more means OOM |
+| UA probe | 8 HTTP requests | 4 | It's cheap; it shouldn't queue behind something expensive |
+
+The probe deliberately **does not ride along with the deep check**: queueing a stage that
+issues a handful of HTTP requests behind a stage that launches a browser and permits exactly
+one at a time makes no sense. Both are triggered in parallel, each using its own pool.
+
+It deliberately **does not ride along with the light check** either — that one is what the user
+is staring at the screen waiting for, and its budget is already spent.
+
+Toward the target site, the probes are issued **serially**, sharing the same 300ms per-origin
+throttle. Seven simultaneous requests to one site look like an attack from the other side.
+
+And although the User-Agent strings are exact spoofs, we always add an extra
+`X-Probed-By: MiaowaGEO-Audit (+https://miaowageo.com/geocheck)` header. WAF rules match on
+User-Agent, so fidelity is unaffected — but whoever reads those logs can see who was probing.
+**`robots.txt` is still obeyed**: changing our User-Agent does not entitle us to ignore a
+site's crawling rules.
+
+### 374 tests, and every defence has been mutation-verified
+
+`npm test` runs 374 tests. More importantly, **every significant defence has been mutation-tested** — the defensive code is deleted and we confirm a test actually turns red.
 
 A test that cannot turn red is more dangerous than no test at all: it makes people believe something is guarded.
 
@@ -598,7 +816,7 @@ A test that cannot turn red is more dangerous than no test at all: it makes peop
 git clone https://github.com/Saqierma/miaowageo.git
 cd miaowageo
 npm install        # installs lighthouse only
-npm test           # 324 tests
+npm test           # 374 tests
 ```
 
 Requires Node.js >= 22.13.0. See [`deploy/README.md`](deploy/README.md).
