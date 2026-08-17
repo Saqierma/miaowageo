@@ -290,13 +290,17 @@ test("正常站点：七个 check 模块都参与拼装，返回形状完整", a
   assert.equal(result.baseUrl, "http://host.example");
   assert.equal(result.finalUrl, "http://host.example/");
   assert.equal(result.robotsAllowedPage, true);
-  // 13(robots) + 1(readability) + 2(structured) + 2(canonical)
-  // + 8(metadata) + 1(sitemap) + 3(agent) = 30
+  // 14(robots) + 1(readability) + 2(structured) + 2(canonical)
+  // + 8(metadata) + 1(sitemap) + 3(agent) = 31
   //
   // metadata 那 8 项是 2026-08-07 加的：title / description / h1 / lang /
   // hreflang / viewport / og / img-alt，全部从**已经抓到的** page HTML 判定，
   // 不多发一次请求。加它们的理由见 src/checks/html-meta.mjs 顶部。
-  assert.equal(result.results.length, 30);
+  //
+  // robots 从 13 变 14 是 2026-08-17 补 Claude-SearchBot 的结果：此前把
+  // ClaudeBot 当成了 Anthropic 的检索爬虫，而它只采训练语料。
+  // 见 src/checks/robots.mjs 顶部与那两条分层原则测试。
+  assert.equal(result.results.length, 31);
 
   const groups = new Set(result.results.map((r) => r.group));
   for (const g of ["access", "metadata", "readability", "structured", "agent"]) {

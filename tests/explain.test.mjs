@@ -184,7 +184,7 @@ test("**非法语言回落中文，不返回 undefined**", () => {
   assert.ok(explainFor("no.such.check", "en").what.length > 10);
 });
 
-test("13 个爬虫共用一份解释，不是 13 份", () => {
+test("14 个爬虫共用一份解释，不是 14 份", () => {
   // 逐个写会让读者以为有 13 件事要做，其实是同一件。
   for (const locale of EXPLAIN_LOCALES) {
     const x = explainFor("robots.oai-searchbot", locale);
@@ -301,7 +301,7 @@ test("**被 403 挡住的项不进待办**——那是整份报告的前提，�
   assert.deepEqual(actionPlan(dirty), [], "非 ready 的项即使带着 verdict 也不得进待办");
 });
 
-test("13 个爬虫只出一条待办，不是 13 条", () => {
+test("14 个爬虫只出一条待办，不是 14 条", () => {
   const plan = actionPlan([
     item({ id: "robots.claudebot", verdict: "fail" }),
     item({ id: "robots.gptbot", verdict: "fail" }),
@@ -359,7 +359,7 @@ test("空输入不崩", () => {
 
 test("**语言只换文案，不换待办的成员与顺序**", () => {
   // 同一个站的中英文报告如果给出两套不同的待办，那就不是同一份事实的两种说法，
-  // 而是两个互相矛盾的结论。过滤、13 个爬虫折叠、fail/warn 排序都必须与语言无关。
+  // 而是两个互相矛盾的结论。过滤、14 个爬虫折叠、fail/warn 排序都必须与语言无关。
   const raw = [
     item({ id: "metadata.img-alt", verdict: "fail" }),
     item({ id: "access.noindex", verdict: "warn" }),

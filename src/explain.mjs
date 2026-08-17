@@ -63,8 +63,8 @@ const FALLBACK = Object.freeze({
 });
 
 /**
- * 13 个爬虫准入项共用一份解释：它们问的是同一件事，
- * 只是换了个爬虫名字。逐个写 13 份，只会让读者以为有 13 件事要做。
+ * 14 个爬虫准入项共用一份解释：它们问的是同一件事，
+ * 只是换了个爬虫名字。逐个写 14 份，只会让读者以为有 14 件事要做。
  */
 const CRAWLER_EXPLANATION = Object.freeze({
   zh: {
@@ -566,7 +566,8 @@ export const CHECK_EXPLANATIONS = Object.freeze({
         "以及各家 AI 爬虫的身份各请求一次，看服务器分别回什么状态码。" +
         "一张表就能看出：**是所有人都进得来，还是只有某几种身份被挡在门外。**",
       risk:
-        "如果只有 AI 爬虫的身份被拒绝，那你的网站在这几家 AI 眼里等于不存在——" +
+        "如果只有 AI 爬虫的身份被拒绝、而作为对照的 Googlebot 进得去，" +
+        "那你的网站在这几家 AI 眼里等于不存在——" +
         "而从浏览器里看一切正常，你不会有任何察觉。这类拦截通常来自 CDN 或 WAF 的" +
         "机器人防护，不是网站程序本身的问题。",
       fix:
@@ -580,7 +581,8 @@ export const CHECK_EXPLANATIONS = Object.freeze({
         "as curl, as Googlebot, and as each of the major AI crawlers — showing what status code the server returns to each. " +
         "One table answers the question: **does everyone get in, or are only certain identities turned away?**",
       risk:
-        "If only the AI crawler identities are refused, your site effectively does not exist inside those AI systems — " +
+        "If only the AI crawler identities are refused while the Googlebot control probe gets in, your site " +
+        "effectively does not exist inside those AI systems — " +
         "while everything looks perfectly fine in a browser, so nothing alerts you. Blocking of this kind usually comes " +
         "from bot protection in a CDN or WAF rather than from the site software itself.",
       fix:
@@ -627,7 +629,7 @@ function normalize(locale) {
 /**
  * 取某个检查项的解释。
  *
- * `robots.*` 走前缀匹配：13 个爬虫共用一份，且折叠后的条目 id 会带上
+ * `robots.*` 走前缀匹配：14 个爬虫共用一份，且折叠后的条目 id 会带上
  * `.rollup` 后缀（见 collapseCrawlerItems），也必须命中。
  *
  * **缺某个语言时不回落到另一种语言。** 在英文报告里露出一段中文，
@@ -715,7 +717,7 @@ export function actionPlan(items, locale = "zh") {
   for (const r of items ?? []) {
     if (r?.state !== "ready") continue;
     if (r.verdict !== "fail" && r.verdict !== "warn") continue;
-    // 13 个爬虫共用一条待办：逐个列会变成十几行同样的话。
+    // 14 个爬虫共用一条待办：逐个列会变成十几行同样的话。
     const key = typeof r.id === "string" && r.id.startsWith("robots.") ? "robots.*" : r.id;
     if (seen.has(key)) continue;
     seen.add(key);

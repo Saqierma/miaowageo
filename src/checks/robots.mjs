@@ -3,28 +3,76 @@ import { outcomeToState } from "./fetch-outcome.mjs";
 import { parseRobots, accessState } from "./robots-parse.mjs";
 
 /**
- * V1 爬虫清单。
+ * 爬虫清单。
  *
- * `scored: false` 的四个只影响训练语料，与引用资格无关，因此永不进分母——
- * 它们呈现事实，不判好坏。
+ * ---------------------------------------------------------------------------
+ * 分层原则：训练型不计分，检索型才计分
  *
+ * 各家 AI 公司的爬虫是**分层**的，同一家往往有三个独立身份：
+ *
+ *   训练型     采集训练语料。封禁它是版权决定，**不影响你能不能被引用**
+ *   检索型     为搜索回答建索引。封禁它 = 在那家 AI 的答案里消失
+ *   用户触发型 用户提问时实时抓取。封禁它只影响那一次对话
+ *
+ * 把三者混为一谈，是目前大量 GEO 文章共同的错误。所以：
+ * **训练型一律 `scored: false`**（呈现事实，不判好坏），
+ * **检索型一律 `scored: true` + `blocked: "fail"`**。
+ *
+ * ---------------------------------------------------------------------------
+ * 我们自己在这条原则上栽过一次
+ *
+ * 2026-08 之前，这张表把 OpenAI 的三层（GPTBot / OAI-SearchBot / ChatGPT-User）
+ * 拆对了，却把 Anthropic 完全对称的三层拆错了：ClaudeBot 被标成「影响 Claude
+ * 检索」且计分，而它其实**只采训练语料**；真正负责搜索索引的 Claude-SearchBot
+ * 压根不在表里。同一个文件里两套标准，正是本项目最主要的方法论卖点在自己身上失效。
+ *
+ * 一条外部评审指出了它。修法不只是补一行——`tests/robots-checks.test.mjs` 里
+ * 现在有两条测试守着**原则本身**（分层原则、三家对称性），而不只是守
+ * 「一共有几个爬虫」这类事实。事实型断言只能防止别人删东西，防不住一开始就分错类。
+ *
+ * 依据：Anthropic 支持文档 8896518，ClaudeBot「collecting web content that could
+ * potentially contribute to their training」、Claude-SearchBot「navigates the web
+ * to improve search result quality」。
+ *
+ * ---------------------------------------------------------------------------
  * `blocked` 列给出整站封禁时的 verdict：只有真正影响「能不能被引用」的才记 fail。
  */
 const CRAWLERS = [
+  // ── 检索型：封禁 = 在那家 AI 的搜索回答里消失 ────────────────────────
   { id: "oai-searchbot",    name: "OAI-SearchBot",      scored: true,  blocked: "fail", note: "OpenAI 官方说明：选择退出的站点不会出现在 ChatGPT 搜索答案中" },
+  { id: "claude-searchbot", name: "Claude-SearchBot",   scored: true,  blocked: "fail", note: "Anthropic 官方说明：封禁后不再为搜索优化索引你的内容，降低在 Claude 搜索回答中的可见性" },
   { id: "perplexitybot",    name: "PerplexityBot",      scored: true,  blocked: "fail", note: "影响 Perplexity 自有索引的收录" },
-  { id: "claudebot",        name: "ClaudeBot",          scored: true,  blocked: "fail", note: "影响 Claude 检索" },
   { id: "bingbot",          name: "Bingbot",            scored: true,  blocked: "fail", note: "Microsoft Copilot 一切以 Bing 索引为前提" },
+
+  // ── 用户触发型与其他：影响有限，记 warn ──────────────────────────────
   { id: "google-extended",  name: "Google-Extended",    scored: true,  blocked: "warn", note: "影响 Gemini 的 grounding，不影响传统 Google 搜索排名" },
   { id: "chatgpt-user",     name: "ChatGPT-User",       scored: true,  blocked: "warn", note: "仅影响用户主动触发的实时抓取" },
   { id: "claude-user",      name: "Claude-User",        scored: true,  blocked: "warn", note: "仅影响用户主动触发的实时抓取" },
   { id: "perplexity-user",  name: "Perplexity-User",    scored: true,  blocked: "warn", note: "仅影响用户主动触发的实时抓取" },
   { id: "applebot",         name: "Applebot",           scored: true,  blocked: "warn", note: "影响 Siri 与 Spotlight" },
+
+  // ── 训练型：一律不计分。封禁它们是版权决定，与引用资格无关 ──────────
   { id: "gptbot",           name: "GPTBot",             scored: false, blocked: "info", note: "仅用于训练语料采集，不影响 ChatGPT 的引用资格" },
+  { id: "claudebot",        name: "ClaudeBot",          scored: false, blocked: "info", note: "仅用于模型训练语料采集，不影响 Claude 搜索的引用资格" },
   { id: "applebot-extended",name: "Applebot-Extended",  scored: false, blocked: "info", note: "仅用于训练语料采集" },
   { id: "amazonbot",        name: "Amazonbot",          scored: false, blocked: "info", note: "训练语料" },
   { id: "ccbot",            name: "CCBot",              scored: false, blocked: "info", note: "Common Crawl 训练语料" },
 ];
+
+/**
+ * 分层归类，**供测试守原则用**。
+ *
+ * 单独导出而不是写死在测试里：写死在测试里的话，加一个新爬虫时测试不会提醒你
+ * 给它归类——它会安静地不属于任何一层，而分层原则测试照样全绿。
+ */
+export const CRAWLER_TIERS = Object.freeze({
+  training: ["gptbot", "claudebot", "applebot-extended", "amazonbot", "ccbot"],
+  retrieval: ["oai-searchbot", "claude-searchbot", "perplexitybot", "bingbot"],
+  userTriggered: ["chatgpt-user", "claude-user", "perplexity-user"],
+  other: ["google-extended", "applebot"],
+});
+
+export { CRAWLERS };
 
 /**
  * 把放行路径列表格式化成 observation 里可以安全展示的一小段文字。
@@ -63,7 +111,7 @@ function describe(crawler, access) {
 }
 
 /**
- * 把抓取结果转成 13 条 CheckResult（9 条 scored + 4 条 advisory）。
+ * 把抓取结果转成 14 条 CheckResult（9 条 scored + 5 条 advisory）。
  *
  * **必须接收 outcome 而不是解析后的 groups。** 若只接收 groups，
  * 「robots.txt 是 404（确实没有，等价于放行）」与「429/超时（根本没测到）」

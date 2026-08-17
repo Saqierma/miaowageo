@@ -54,7 +54,11 @@
 
 ## 二、什么是 GEO？和 SEO 有什么区别？
 
-**GEO（Generative Engine Optimization，生成式引擎优化）**，指让你的网站内容能够被生成式 AI 引擎——ChatGPT、Claude、Perplexity、Gemini、Copilot、豆包、Kimi 等——**抓取、理解、并在回答中引用**的一整套优化工作。
+**GEO（Generative Engine Optimization，生成式引擎优化）**，指让你的网站内容能够被生成式 AI 引擎——ChatGPT、Claude、Perplexity、Gemini、Copilot 等——**抓取、理解、并在回答中引用**的一整套优化工作。
+
+> **本工具只覆盖海外引擎，国内引擎测不了。** 豆包、Kimi 这些国内 AI 至今**没有公开检索型爬虫的 User-Agent 身份**——字节的 Bytespider 是训练爬虫，且没有官方的 robots 说明文档。没有可声明的身份，就没有可判定的准入状态。
+>
+> 我们不打算靠猜一个 UA 来凑出「国内可见性」那一栏：**测不了就说测不了**，这和报告里「没测到 ≠ 不合格」是同一条原则。等它们公布了，我们会加上。
 
 | | 传统 SEO | GEO（生成式引擎优化） |
 | --- | --- | --- |
@@ -99,27 +103,46 @@
 
 **27 个计分项，分 6 组。** 全部是可验证的技术事实，不含任何主观打分。
 
+> **目前只检测入口页面这一页。** `robots.txt` 与 `sitemap.xml` 是站点级的，结论对全站成立；但 `canonical`、`hreflang`、结构化数据、静态可读性**都是逐页不同的**——首页写对了，产品页可能全错。
+>
+> 所以这几项的结论只对被测的那一页负责，**从首页外推到全站是有限的**。全站抽样在规划中。
+
 ### 1. AI 搜索准入检测（robots.txt 逐个爬虫判定）
 
-对 **13 个** AI 与搜索爬虫**逐一**按 RFC 9309 求值——不是笼统看一句 `User-agent: *`，而是分别判定每一个：
+对 **14 个** AI 与搜索爬虫**逐一**按 RFC 9309 求值——不是笼统看一句 `User-agent: *`，而是分别判定每一个。
 
-| 爬虫 | 被封禁的影响 | 计分 |
+**各家的爬虫是分层的。** 同一家公司往往有三个独立身份，作用完全不同：
+
+| 分层 | 它干什么 | 封禁它的后果 |
 | --- | --- | --- |
-| **OAI-SearchBot** | 选择退出的站点不会出现在 ChatGPT 搜索答案中 | ✅ |
-| **PerplexityBot** | 影响 Perplexity 自有索引的收录 | ✅ |
-| **ClaudeBot** | 影响 Claude 检索 | ✅ |
-| **Bingbot** | Microsoft Copilot 一切以 Bing 索引为前提 | ✅ |
-| **Google-Extended** | 影响 Gemini 的 grounding，**不影响**传统 Google 排名 | ✅ |
-| **ChatGPT-User** | 仅影响用户主动触发的实时抓取 | ✅ |
-| **Claude-User** | 同上 | ✅ |
-| **Perplexity-User** | 同上 | ✅ |
-| **Applebot** | 影响 Siri 与 Spotlight | ✅ |
-| GPTBot | 仅训练语料采集，**不影响** ChatGPT 的引用资格 | 参考项 |
-| Applebot-Extended | 仅训练语料采集 | 参考项 |
-| Amazonbot | 训练语料 | 参考项 |
-| CCBot | Common Crawl 训练语料 | 参考项 |
+| **训练型** | 采集训练语料 | 是版权决定，**不影响你能不能被引用** |
+| **检索型** | 为搜索回答建索引 | **在那家 AI 的答案里消失** |
+| 用户触发型 | 用户提问时实时抓取 | 只影响那一次对话 |
+
+所以我们的计分规则是：**训练型一律不计分，检索型一律计分。**
+
+| 爬虫 | 分层 | 被封禁的影响 | 计分 |
+| --- | --- | --- | --- |
+| **OAI-SearchBot** | 检索 | 选择退出的站点不会出现在 ChatGPT 搜索答案中 | ✅ |
+| **Claude-SearchBot** | 检索 | 不再为搜索优化索引你的内容，降低在 Claude 搜索回答中的可见性 | ✅ |
+| **PerplexityBot** | 检索 | 影响 Perplexity 自有索引的收录 | ✅ |
+| **Bingbot** | 检索 | Microsoft Copilot 一切以 Bing 索引为前提 | ✅ |
+| **Google-Extended** | 其他 | 影响 Gemini 的 grounding，**不影响**传统 Google 排名 | ✅ |
+| **ChatGPT-User** | 用户触发 | 仅影响用户主动触发的实时抓取 | ✅ |
+| **Claude-User** | 用户触发 | 同上 | ✅ |
+| **Perplexity-User** | 用户触发 | 同上 | ✅ |
+| **Applebot** | 其他 | 影响 Siri 与 Spotlight | ✅ |
+| GPTBot | 训练 | 仅训练语料采集，**不影响** ChatGPT 的引用资格 | 参考项 |
+| ClaudeBot | 训练 | 仅训练语料采集，**不影响** Claude 搜索的引用资格 | 参考项 |
+| Applebot-Extended | 训练 | 仅训练语料采集 | 参考项 |
+| Amazonbot | 训练 | 训练语料 | 参考项 |
+| CCBot | 训练 | Common Crawl 训练语料 | 参考项 |
 
 > **为什么 GPTBot 只是参考项而不计分？** 因为它只用于采集训练语料，封禁它**不影响**你的内容出现在 ChatGPT 的搜索式回答里——那是 OAI-SearchBot 的事。把两者混为一谈，是目前大量 GEO 文章共同的错误。封禁 GPTBot 是很多企业深思熟虑后的版权决定，我们**呈现事实，不替你判对错**。
+
+> **我们自己在这条原则上栽过一次。** 2026-08 之前，这张表把 OpenAI 的三层拆对了，却把 Anthropic 完全对称的三层拆错了：ClaudeBot 被标成「影响 Claude 检索」且计分，而它其实**只采训练语料**；真正负责搜索索引的 **Claude-SearchBot 压根不在表里**。同一个文件里两套标准——这个项目最主要的方法论卖点，在它自己身上失效了。
+>
+> 一位外部读者指出了它。修法不只是补一行：现在 [`tests/robots-checks.test.mjs`](tests/robots-checks.test.mjs) 里有三条测试守着**原则本身**（训练型不计分、每个爬虫必须被归层、三家的三层必须对称），而不只是守「一共有几个爬虫」这类事实。**事实型断言只能防止别人删东西，防不住一开始就分错类。**
 
 同组还包括：`canonical` 标签、`noindex` 声明、`sitemap.xml` 可达性。
 
@@ -370,9 +393,16 @@ Worker 用自签证书、按 IP 被调用，公共 CA 体系在这里失去意�
 WAF 规则匹配的是 User-Agent，保真度不受影响；而对方查日志时能看清是谁在探测。
 **遵守 `robots.txt` 也照旧**——换一个 UA 去探测，不等于可以无视对方的抓取规则。
 
-### 374 个测试，每一条防线都被变异验证过
+### 设计决策的完整说明
 
-`npm test` 跑 374 个测试，每次 push 与 PR 由 GitHub Actions 在 Node 22 与 24 上各跑一遍（上面那个徽章就是它）。更要紧的是：**每一条重要防线都做过变异测试**——把防御代码删掉，确认真的有测试变红。
+本仓库的注释是中文写的。为了让英文读者也能读到**为什么**，另有一份英文的
+[**ARCHITECTURE.md**](ARCHITECTURE.md)，逐条讲清威胁模型、连接钉死、浏览器隔离、
+三态模型、Googlebot 对照探针、训练型与检索型爬虫的分层（**包括我们自己在这上面
+栽过的那一跤**）、变异测试纪律，以及三阶段各自独立的并发池。
+
+### 377 个测试，每一条防线都被变异验证过
+
+`npm test` 跑 377 个测试，每次 push 与 PR 由 GitHub Actions 在 Node 22 与 24 上各跑一遍（上面那个徽章就是它）。更要紧的是：**每一条重要防线都做过变异测试**——把防御代码删掉，确认真的有测试变红。
 
 一个不会变红的测试，是比没有测试更危险的东西：它让人以为那里被守着。
 
@@ -380,7 +410,7 @@ WAF 规则匹配的是 User-Agent，保真度不受影响；而对方查日志�
 git clone https://github.com/Saqierma/miaowageo.git
 cd miaowageo
 npm install        # 只装 lighthouse
-npm test           # 374 个测试
+npm test           # 377 个测试
 ```
 
 需要 Node.js >= 22.13.0。部署见 [`deploy/README.md`](deploy/README.md)。
@@ -490,6 +520,10 @@ That is what this tool does.
 
 **GEO (Generative Engine Optimization)** is the work of making your content crawlable, understandable, and **citable** by generative AI engines — ChatGPT, Claude, Perplexity, Gemini, Copilot and others.
 
+> **This tool covers overseas engines only; China's engines cannot be checked.** Doubao, Kimi and their peers have **published no retrieval-crawler User-Agent identity** to date — ByteDance's Bytespider is a training crawler, and it has no official robots documentation. With no identity to declare, there is no access state to judge.
+>
+> We are not going to guess a User-Agent in order to fill in a "domestic visibility" column: **if we cannot measure it, we say so.** Same principle as "not measured ≠ failed" everywhere else in the report. When they publish, we will add them.
+
 | | Traditional SEO | GEO |
 | --- | --- | --- |
 | Goal | Rank higher on the results page | **Get mentioned and cited** inside the generated answer |
@@ -533,27 +567,46 @@ Check from the wrong place and you've measured your own network, not the AI's po
 
 **27 scored checks across 6 groups.** All verifiable technical facts. No subjective scoring anywhere.
 
+> **Only the entry page is checked at present.** `robots.txt` and `sitemap.xml` are site-level, so those conclusions hold for the whole site. But `canonical`, `hreflang`, structured data and static readability **differ from page to page** — a correct homepage says nothing about the product pages.
+>
+> Those conclusions therefore apply to the one page that was checked; **extrapolating from the homepage to the whole site is limited**. Site-wide sampling is planned.
+
 ### 4.1 AI search access (per-crawler `robots.txt` evaluation)
 
-**13 crawlers** are evaluated **individually** per RFC 9309 — not a blanket read of `User-agent: *`:
+**14 crawlers** are evaluated **individually** per RFC 9309 — not a blanket read of `User-agent: *`.
 
-| Crawler | Impact if blocked | Scored |
+**Each vendor's crawlers come in tiers.** One company typically operates three separate identities that do entirely different things:
+
+| Tier | What it does | Consequence of blocking it |
 | --- | --- | --- |
-| **OAI-SearchBot** | Opted-out sites do not appear in ChatGPT search answers | ✅ |
-| **PerplexityBot** | Affects inclusion in Perplexity's own index | ✅ |
-| **ClaudeBot** | Affects Claude retrieval | ✅ |
-| **Bingbot** | Microsoft Copilot depends entirely on the Bing index | ✅ |
-| **Google-Extended** | Affects Gemini grounding; **does not** affect classic Google ranking | ✅ |
-| **ChatGPT-User** | Only user-triggered live fetches | ✅ |
-| **Claude-User** | Same | ✅ |
-| **Perplexity-User** | Same | ✅ |
-| **Applebot** | Affects Siri and Spotlight | ✅ |
-| GPTBot | Training-corpus collection only; **does not** affect ChatGPT citation eligibility | Advisory |
-| Applebot-Extended | Training corpus only | Advisory |
-| Amazonbot | Training corpus | Advisory |
-| CCBot | Common Crawl training corpus | Advisory |
+| **Training** | Collects training corpus | A copyright decision — **does not affect whether you can be cited** |
+| **Retrieval** | Indexes for search answers | **You disappear from that AI's answers** |
+| User-triggered | Fetches live when a user asks | Affects only that one conversation |
+
+Hence the scoring rule: **training-tier crawlers are never scored; retrieval-tier crawlers always are.**
+
+| Crawler | Tier | Impact if blocked | Scored |
+| --- | --- | --- | --- |
+| **OAI-SearchBot** | Retrieval | Opted-out sites do not appear in ChatGPT search answers | ✅ |
+| **Claude-SearchBot** | Retrieval | Your content is no longer indexed for search optimisation, reducing visibility in Claude's search answers | ✅ |
+| **PerplexityBot** | Retrieval | Affects inclusion in Perplexity's own index | ✅ |
+| **Bingbot** | Retrieval | Microsoft Copilot depends entirely on the Bing index | ✅ |
+| **Google-Extended** | Other | Affects Gemini grounding; **does not** affect classic Google ranking | ✅ |
+| **ChatGPT-User** | User-triggered | Only user-triggered live fetches | ✅ |
+| **Claude-User** | User-triggered | Same | ✅ |
+| **Perplexity-User** | User-triggered | Same | ✅ |
+| **Applebot** | Other | Affects Siri and Spotlight | ✅ |
+| GPTBot | Training | Training-corpus collection only; **does not** affect ChatGPT citation eligibility | Advisory |
+| ClaudeBot | Training | Training-corpus collection only; **does not** affect Claude search citation eligibility | Advisory |
+| Applebot-Extended | Training | Training corpus only | Advisory |
+| Amazonbot | Training | Training corpus | Advisory |
+| CCBot | Training | Common Crawl training corpus | Advisory |
 
 > **Why is GPTBot advisory rather than scored?** Because it only gathers training data. Blocking it does **not** remove you from ChatGPT's search-style answers — that is governed by OAI-SearchBot. Conflating the two is a mistake repeated across a great deal of GEO writing. Blocking GPTBot is a deliberate copyright decision for many companies; we **report the fact and do not grade the choice**.
+
+> **We got this wrong ourselves, on our own headline principle.** Before August 2026 this table had OpenAI's three tiers right and Anthropic's perfectly symmetric three tiers wrong: ClaudeBot was labelled "affects Claude retrieval" and scored, when in fact it **only collects training data** — and **Claude-SearchBot, the one that actually builds the search index, was missing entirely**. Two different standards inside one file.
+>
+> An outside reader pointed it out. The fix was not just adding a row: [`tests/robots-checks.test.mjs`](tests/robots-checks.test.mjs) now carries three tests that guard **the principle itself** — training tier is never scored, every crawler must be assigned a tier, and each vendor's three tiers must be present and symmetric. **Assertions about facts only stop people deleting things; they cannot stop a wrong classification made on day one.**
 
 Also in this group: `canonical`, `noindex`, and `sitemap.xml` reachability.
 
@@ -816,9 +869,16 @@ User-Agent, so fidelity is unaffected — but whoever reads those logs can see w
 **`robots.txt` is still obeyed**: changing our User-Agent does not entitle us to ignore a
 site's crawling rules.
 
-### 374 tests, and every defence has been mutation-verified
+### Design decisions in full
 
-`npm test` runs 374 tests, and GitHub Actions runs them on Node 22 and 24 on every push and pull request (that is the badge at the top). More importantly, **every significant defence has been mutation-tested** — the defensive code is deleted and we confirm a test actually turns red.
+The source comments are in Chinese. [**ARCHITECTURE.md**](ARCHITECTURE.md) carries the same
+*why* in English: the threat model, connection pinning, browser isolation, the three-state model,
+the Googlebot control probe, training-vs-retrieval crawler tiers (**including the bug we shipped
+on our own headline principle**), the mutation-testing discipline, and the three concurrency pools.
+
+### 377 tests, and every defence has been mutation-verified
+
+`npm test` runs 377 tests, and GitHub Actions runs them on Node 22 and 24 on every push and pull request (that is the badge at the top). More importantly, **every significant defence has been mutation-tested** — the defensive code is deleted and we confirm a test actually turns red.
 
 A test that cannot turn red is more dangerous than no test at all: it makes people believe something is guarded.
 
@@ -826,7 +886,7 @@ A test that cannot turn red is more dangerous than no test at all: it makes peop
 git clone https://github.com/Saqierma/miaowageo.git
 cd miaowageo
 npm install        # installs lighthouse only
-npm test           # 374 tests
+npm test           # 377 tests
 ```
 
 Requires Node.js >= 22.13.0. See [`deploy/README.md`](deploy/README.md).
