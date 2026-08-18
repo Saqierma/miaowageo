@@ -308,7 +308,15 @@ export function uaMatrixChecks(rows, pageUrl, failureOutcome = null) {
         reason: m.kind === "baseline_failed" ? "network" : "worker_error",
         observation: OBSERVATION[m.kind](m, rows ?? []),
         limitation: LIMITATION[m.kind],
-        evidence: { url: pageUrl, matrix: rows },
+        // **interpretation 在这一支也必须带上。** 曾经漏掉过，后果很具体：
+        // 报告页顶部的结论横幅拿不到判定，回落到「两者只差一个 User-Agent，
+        // 说明按 UA 拦截」这句话——而 baseline_failed 恰恰是**证伪** UA 假说的
+        // 那一支（冒充 Chrome 也被拦）。于是同一个页面上，横幅说按 UA 拦截，
+        // 下面这条 limitation 写着「拦截不是按 User-Agent 做的」，自相矛盾。
+        //
+        // 「没测到」≠「没有结论可报」：我们没测出准入状态，但**测出了
+        // 拦截不按 UA 走**，那是一条实打实的观测。
+        evidence: { url: pageUrl, matrix: rows, interpretation: m.kind },
       }),
     ];
   }

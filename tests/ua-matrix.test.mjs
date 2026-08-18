@@ -170,6 +170,28 @@ test("整张矩阵进 evidence，读者能一眼数回到原始观测", () => {
   assert.equal(r.evidence.interpretation, "ai_blocked");
 });
 
+test("**每一支都必须把 interpretation 带进 evidence，包括没测出结论的那些**", () => {
+  // 漏掉过一次，后果是跨模块的：报告页顶部的结论横幅按 interpretation 选文案，
+  // baseline_failed 那一支没带，横幅就回落去说「两者只差一个 User-Agent，
+  // 说明按 UA 拦截」——而 baseline_failed 恰恰**证伪**了这句话
+  // （冒充浏览器也被拦）。同一份报告里两句话打架。
+  //
+  // 「没测出准入状态」≠「没有观测可报」。
+  const cases = [
+    ["all_open", matrix()],
+    ["ai_blocked", matrix({ ai: 403 })],
+    ["verification", matrix({ control: 403, ai: 403 })],
+    ["non_browser_block", matrix({ generic: 403, ai: 403 })],
+    // 连基线都被拦：项是 no_data，但 interpretation 照样要带上
+    ["baseline_failed", matrix({ baseline: 403, generic: 403, control: 403, ai: 403 })],
+  ];
+  for (const [expected, rows] of cases) {
+    const [r] = uaMatrixChecks(rows, "https://x.example/");
+    assert.equal(r.evidence?.interpretation, expected, `${expected} 这一支没把 interpretation 带进 evidence`);
+    assert.ok(Array.isArray(r.evidence?.matrix), `${expected} 这一支没把矩阵带进 evidence`);
+  }
+});
+
 test("阶段整体失败时按对方侧原因记，且带 reason", () => {
   const [r] = uaMatrixChecks(null, "https://x.example/", { ok: false, status: null, reason: "timeout" });
   assert.equal(r.state, "no_data");
