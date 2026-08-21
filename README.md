@@ -11,7 +11,7 @@
 
 [English below ↓](#miaowageo--free-open-source-geo-checker)
 
-> 无需注册、不留邮箱、不留手机号。从海外检测点发起，27 项技术检查，每一条结论都附证据与边界。
+> 无需注册、不留邮箱、不留手机号。从海外检测点发起，28 项技术检查，每一条结论都附证据与边界。
 
 ![妙蛙 GEO 检测工具首页](docs/screenshot-geocheck.png)
 
@@ -101,7 +101,7 @@
 
 ## 四、它到底检查什么
 
-**27 个计分项，分 6 组。** 全部是可验证的技术事实，不含任何主观打分。
+**28 个计分项，分 6 组。** 全部是可验证的技术事实，不含任何主观打分。
 
 > **目前只检测入口页面这一页。** `robots.txt` 与 `sitemap.xml` 是站点级的，结论对全站成立；但 `canonical`、`hreflang`、结构化数据、静态可读性**都是逐页不同的**——首页写对了，产品页可能全错。
 >
@@ -145,6 +145,41 @@
 > 一位外部读者指出了它。修法不只是补一行：现在 [`tests/robots-checks.test.mjs`](tests/robots-checks.test.mjs) 里有三条测试守着**原则本身**（训练型不计分、每个爬虫必须被归层、三家的三层必须对称），而不只是守「一共有几个爬虫」这类事实。**事实型断言只能防止别人删东西，防不住一开始就分错类。**
 
 同组还包括：`canonical` 标签、`noindex` 声明、`sitemap.xml` 可达性。
+
+#### 这份 `robots.txt` 里，哪几行是你写的？
+
+Cloudflare 的托管 robots.txt 会把它自己的内容**拼在你的文件前面**，合成一个响应返回；
+你没有 robots.txt 时它直接替你创建一份。截至 2026-08，有 **380 万以上域名**在用这个功能。
+
+后果是：你打开 `你的域名/robots.txt` 看到 `User-agent: ClaudeBot / Disallow: /`，
+第一反应是「我们没写过这个」——**你是对的**。
+
+所以报告会把两者切开：「这份文件共 N 行，前 K 行由 CDN 注入，第 K+1 行起来自你的源站」。
+这句话的价值在于它能直接指路：**CDN 注入的那部分，去控制台改，不用动你的源站文件。**
+
+> **认不出时我们说认不出，绝不猜。** 把 CDN 的规则算到你头上，会让你去改一个你没写过的
+> 东西；反过来会让你以为进控制台点一下就行，而实际得改源站文件。**两种猜错都比不做这个
+> 功能更糟。** 特征表带 `source` 与 `verifiedAt` 字段，因为它依赖的是厂商自己的输出文本，
+> 而对方随时可以改。
+
+顺带读出 `Content-Signal` 声明（`search` / `ai-input` / `ai-train`），但**不计分**——
+Google 已公开表示没有任何爬虫或 LLM 读取这个指令。呈现它是因为它记录了一个**意图**，
+而且要提醒你：托管默认值是 `search=yes, ai-train=no`，`ai-input` 被刻意留空。
+`ai-train=no` 通常是深思熟虑的版权决定，`ai-input` 留空往往只是没人设过。
+
+#### 页面进得了索引，却没有一句话可以被摘录
+
+`noindex` 大家都查。而 **`nosnippet` 几乎没人查**——它的后果是「页面还在索引里，
+但任何一句话都不许被摘出来展示」。
+
+**生成式引擎的引用，本质就是摘录一段话。** 不许摘录，就等于不可能被引用。
+而在传统 SEO 的报告里，它只是搜索结果少一行描述，几乎看不出异常。
+
+我们查四种写法：`nosnippet`、`max-snippet:0`（等效）、`max-snippet:N`（限长）、
+`noarchive`，来源同时看 `meta robots` 与 `X-Robots-Tag` 响应头；
+另外统计 HTML 里 **`data-nosnippet` 属性的出现次数**——它是逐块生效的，
+常被用来遮价格或时间戳，而一个没收好的标签就能把整段正文包进去，
+**页面在浏览器里看起来毫无异样**。
 
 ### 2. 页面元信息与国际化
 
@@ -227,6 +262,40 @@ Googlebot 当对照能把两种情况分开——几乎没有人会故意封 Goo
 
 第二行和第四行都会**如实报告「我们无法判定」**，而不是给一个看起来很确定的结论。
 这与本项目「没测到 ≠ 不合格」是同一条原则。
+
+#### 这个对照的前提，正在被一个外部事件推翻
+
+上面整套判定的地基是「几乎没有人会故意封 Googlebot」。**2026-09-15 起，
+这句话在一大类站点上不再成立。**
+
+Cloudflare 于 2026-07-01 宣布：自 **2026-09-15** 起，在**含广告的页面**上默认封禁
+训练类爬虫，适用于新客户、现有客户的新站点与**全部免费套餐用户**
+（现有付费客户不受自动影响，可在控制台覆盖）。而它把
+**Googlebot、Bingbot、Applebot 归为「多用途爬虫」**——同时做搜索与训练，
+按**最严格的适用规则**处理。官方原文：
+
+> multi-purpose crawlers such as Googlebot, Applebot, and BingBot will be
+> blocked by customers who have selected to block Training
+
+也就是说，在「Cloudflare + 含广告 + 免费套餐」的站点上，Googlebot 会因为一个
+**与「已验证机器人校验」毫无关系的理由**拿到 403。若我们继续照第二行说
+「真 GPTBot 可能进得去」，就会在**放行方向上说错话**——那比说不出结论糟得多。
+
+所以我们加了两个旁证：**该站点是不是在 Cloudflare 后面**（响应头已有），
+以及**页面是否广告变现**（查 `/ads.txt`，一次请求）。两者同时成立时，
+判定改为「对照失去区分力」，**把两种解释都摆出来，不二选一**：
+
+| | 解释一 | 解释二 |
+| --- | --- | --- |
+| 是什么 | 站点在做已验证机器人校验 | Cloudflare 的 9/15 默认封禁 |
+| 真爬虫进得来吗 | **很可能进得来** | **真的被拦了** |
+| 怎么确认 | 查服务器日志里的真实响应码 | Cloudflare 控制台 → Security → Settings → AI 爬虫策略 |
+
+**旁证不全时一律退回原判定**——没有证据就不启用新分支，宁可少说一种可能。
+
+> 这一项还有一个附带提醒值得单独说：既然 Googlebot 被归为多用途爬虫，
+> **一个只想挡住 AI 训练的设置，可能连搜索收录一起挡掉。**
+> 报告会提示为 Googlebot、Bingbot 单独写放行规则。
 
 判定逻辑在 [`src/probe/ua-matrix.mjs`](src/probe/ua-matrix.mjs)，四种组合各有测试守着。
 
@@ -400,9 +469,9 @@ WAF 规则匹配的是 User-Agent，保真度不受影响；而对方查日志�
 三态模型、Googlebot 对照探针、训练型与检索型爬虫的分层（**包括我们自己在这上面
 栽过的那一跤**）、变异测试纪律，以及三阶段各自独立的并发池。
 
-### 378 个测试，每一条防线都被变异验证过
+### 403 个测试，每一条防线都被变异验证过
 
-`npm test` 跑 378 个测试，每次 push 与 PR 由 GitHub Actions 在 Node 22 与 24 上各跑一遍（上面那个徽章就是它）。更要紧的是：**每一条重要防线都做过变异测试**——把防御代码删掉，确认真的有测试变红。
+`npm test` 跑 403 个测试，每次 push 与 PR 由 GitHub Actions 在 Node 22 与 24 上各跑一遍（上面那个徽章就是它）。更要紧的是：**每一条重要防线都做过变异测试**——把防御代码删掉，确认真的有测试变红。
 
 一个不会变红的测试，是比没有测试更危险的东西：它让人以为那里被守着。
 
@@ -410,7 +479,7 @@ WAF 规则匹配的是 User-Agent，保真度不受影响；而对方查日志�
 git clone https://github.com/Saqierma/miaowageo.git
 cd miaowageo
 npm install        # 只装 lighthouse
-npm test           # 378 个测试
+npm test           # 403 个测试
 ```
 
 需要 Node.js >= 22.13.0。部署见 [`deploy/README.md`](deploy/README.md)。
@@ -443,7 +512,24 @@ A：免费，无需注册。有基础的频率限制以防滥用。
 A：见上文「原则一」。综合分会把必要条件、观测结果和推测混进一个数字，看着精确，却没有任何一个具体行动能对应上。
 
 **Q：检测会给我的网站造成负担吗？**
-A：不会。轻检查总共只发 7 次请求（预飞规范化、robots.txt、页面、sitemap.xml、llms.txt、agents.md、/.well-known/ucp）且逐个节流，失败不重试。出站请求标明来意：`MiaowaGEO-Audit/1.0 (+https://miaowageo.com/geocheck; contact@miaowageo.com)`，你能在自己的访问日志里认出我们。
+A：一次完整检测**总共 16 次请求**，逐个节流、失败不重试。拆开是这样：
+
+| 阶段 | 次数 | 请求什么 | 用什么身份 |
+| --- | --- | --- | --- |
+| 轻检查 | 7 | 预飞规范化、robots.txt、页面、sitemap.xml、llms.txt、agents.md、/.well-known/ucp | `MiaowaGEO-Audit/1.0 (+https://miaowageo.com/geocheck; contact@miaowageo.com)` |
+| UA 差分探针 | 7 | 同一个页面，各请求一次 | **逐字节仿冒** Chrome、curl、Googlebot、OAI-SearchBot、GPTBot、ClaudeBot、PerplexityBot |
+| 探针的辅助请求 | 2 | robots.txt（探针自己也要遵守）、/ads.txt | 本工具身份 |
+
+> **关于那 7 次仿冒身份的请求，必须说清楚。** 这是本工具唯一一处不以自己的名义
+> 出现在你日志里的地方——**你会在访问日志里看到 GPTBot、ClaudeBot 等身份**，
+> 而那不是它们本人，是我们。
+>
+> 之所以逐字节仿冒而不加后缀：WAF 规则常按精确串匹配，加了后缀会让一部分规则
+> 不命中，测出来的「没拦」是假的。作为补偿，每一个探针都额外带
+> `X-Probed-By: MiaowaGEO-Audit (+https://miaowageo.com/geocheck)` 头——
+> **按这个头筛一下日志，就能把我们和真爬虫分开。**
+>
+> 探针一律串行、共用同源节流；`robots.txt` 照旧遵守，被禁的路径一个探针都不发。
 
 ---
 
@@ -475,7 +561,7 @@ A：不会。轻检查总共只发 7 次请求（预飞规范化、robots.txt、
 
 [**Run a free check →  miaowageo.com/geocheck**](https://miaowageo.com/geocheck)
 
-> No sign-up, no email, no phone number. Requests originate from an overseas checkpoint. 27 technical checks, every conclusion shipped with its evidence *and its limits*.
+> No sign-up, no email, no phone number. Requests originate from an overseas checkpoint. 28 technical checks, every conclusion shipped with its evidence *and its limits*.
 
 ![miaowageo GEO checker](docs/screenshot-geocheck.png)
 
@@ -565,7 +651,7 @@ Check from the wrong place and you've measured your own network, not the AI's po
 
 ## 4. What it actually checks
 
-**27 scored checks across 6 groups.** All verifiable technical facts. No subjective scoring anywhere.
+**28 scored checks across 6 groups.** All verifiable technical facts. No subjective scoring anywhere.
 
 > **Only the entry page is checked at present.** `robots.txt` and `sitemap.xml` are site-level, so those conclusions hold for the whole site. But `canonical`, `hreflang`, structured data and static readability **differ from page to page** — a correct homepage says nothing about the product pages.
 >
@@ -609,6 +695,46 @@ Hence the scoring rule: **training-tier crawlers are never scored; retrieval-tie
 > An outside reader pointed it out. The fix was not just adding a row: [`tests/robots-checks.test.mjs`](tests/robots-checks.test.mjs) now carries three tests that guard **the principle itself** — training tier is never scored, every crawler must be assigned a tier, and each vendor's three tiers must be present and symmetric. **Assertions about facts only stop people deleting things; they cannot stop a wrong classification made on day one.**
 
 Also in this group: `canonical`, `noindex`, and `sitemap.xml` reachability.
+
+#### Which lines of this `robots.txt` did you actually write?
+
+Cloudflare's managed robots.txt **prepends its own content to your file** and serves the two as one
+response; if you have no robots.txt it creates one for you. As of August 2026, **more than 3.8 million
+domains** use the feature.
+
+The consequence: you open `your-domain/robots.txt`, see `User-agent: ClaudeBot / Disallow: /`, and
+think "we never wrote that" — **and you are right.**
+
+So the report splits the two: "this file has N lines; lines 1–K were injected by the CDN, line K+1
+onward comes from your origin." The value of that sentence is that it points somewhere specific:
+**the CDN-injected part is changed in the vendor's console, not in your origin file.**
+
+> **When we cannot tell, we say so, and never guess.** Attributing a CDN's rule to you sends you to
+> edit something you never wrote; the reverse makes you think a console click will fix what is
+> actually in your own file. **Both mistakes are worse than not offering the feature.** The signature
+> table carries `source` and `verifiedAt` fields, because it depends on the vendor's own output text
+> and they can change it at any time.
+
+We also read out any `Content-Signal` declaration (`search` / `ai-input` / `ai-train`), but it is
+**not scored** — Google has stated publicly that no crawler or LLM reads the directive. We surface it
+because it records an **intent**, and to point out that the managed default is
+`search=yes, ai-train=no` with `ai-input` deliberately left blank. `ai-train=no` is usually a
+considered copyright decision; a blank `ai-input` usually just means nobody set it.
+
+#### In the index, yet not one sentence may be quoted
+
+Everyone checks `noindex`. **Almost nobody checks `nosnippet`** — and its effect is that the page
+stays in the index while *no sentence of it may be displayed*.
+
+**Citation by a generative engine is, at bottom, quoting a passage.** Forbid quoting and being cited
+becomes impossible. In a conventional SEO report this shows up as one missing line of description —
+essentially invisible.
+
+We check four forms — `nosnippet`, `max-snippet:0` (equivalent), `max-snippet:N` (length-capped) and
+`noarchive` — reading both `meta robots` and the `X-Robots-Tag` response header. We also count
+occurrences of the **`data-nosnippet` attribute** in the HTML: it works per block, is typically meant
+to hide a price or a timestamp, and one unclosed tag can swallow the entire article body while
+**the page looks completely normal in a browser**.
 
 ### 4.2 Page metadata and internationalisation
 
@@ -690,6 +816,43 @@ Using Googlebot as a control separates the two cases — almost nobody blocks Go
 Rows two and four both report **"we cannot determine this"** rather than manufacturing a
 confident-looking verdict. Same principle as everywhere else in this project: *not measured*
 is never the same as *failed*.
+
+#### The premise behind this control is being overturned by an outside event
+
+The whole scheme above rests on "almost nobody blocks Googlebot on purpose."
+**From 2026-09-15 that sentence stops being true for a large class of sites.**
+
+Cloudflare announced on 2026-07-01 that from **2026-09-15** it blocks training-class crawlers by
+default **on pages that carry advertising** — applying to new customers, new sites created by
+existing customers, and **all existing free-tier users** (existing paid customers are not affected
+automatically and can override in the dashboard). And it classifies **Googlebot, Bingbot and
+Applebot as "multi-purpose crawlers"** — serving both search and training, handled by the **most
+restrictive applicable rule**. In Cloudflare's own words:
+
+> multi-purpose crawlers such as Googlebot, Applebot, and BingBot will be
+> blocked by customers who have selected to block Training
+
+So on a "Cloudflare + advertising + free tier" site, Googlebot will return 403 for a reason that has
+**nothing to do with verified-bot checking**. If we kept reporting row two's "the real GPTBot may
+well get in", we would be **wrong in the permissive direction** — worse than having no verdict.
+
+We therefore collect two corroborating signals: **whether the site sits behind Cloudflare** (already
+in the response headers) and **whether the page is ad-monetised** (one request to `/ads.txt`). When
+both hold, the verdict becomes "the control has lost its discriminating power", and **both
+explanations are stated, with no choice forced between them**:
+
+| | Explanation A | Explanation B |
+| --- | --- | --- |
+| What it is | The site runs verified-bot checking | Cloudflare's 9/15 default block |
+| Do the real crawlers get in? | **Probably yes** | **No — they really are blocked** |
+| How to confirm | Real status codes in your server logs | Cloudflare dashboard → Security → Settings → AI crawler policies |
+
+**Without both signals we fall back to the original verdict** — no evidence, no new branch; better to
+state one fewer possibility than to invent one.
+
+> One more consequence worth stating on its own: since Googlebot counts as multi-purpose,
+> **a setting intended only to keep AI training out can take your search indexing with it.**
+> The report prompts you to write explicit allow rules for Googlebot and Bingbot.
 
 The interpretation logic lives in [`src/probe/ua-matrix.mjs`](src/probe/ua-matrix.mjs); each of
 the four combinations has a test guarding it.
@@ -876,9 +1039,9 @@ The source comments are in Chinese. [**ARCHITECTURE.md**](ARCHITECTURE.md) carri
 the Googlebot control probe, training-vs-retrieval crawler tiers (**including the bug we shipped
 on our own headline principle**), the mutation-testing discipline, and the three concurrency pools.
 
-### 378 tests, and every defence has been mutation-verified
+### 403 tests, and every defence has been mutation-verified
 
-`npm test` runs 378 tests, and GitHub Actions runs them on Node 22 and 24 on every push and pull request (that is the badge at the top). More importantly, **every significant defence has been mutation-tested** — the defensive code is deleted and we confirm a test actually turns red.
+`npm test` runs 403 tests, and GitHub Actions runs them on Node 22 and 24 on every push and pull request (that is the badge at the top). More importantly, **every significant defence has been mutation-tested** — the defensive code is deleted and we confirm a test actually turns red.
 
 A test that cannot turn red is more dangerous than no test at all: it makes people believe something is guarded.
 
@@ -886,7 +1049,7 @@ A test that cannot turn red is more dangerous than no test at all: it makes peop
 git clone https://github.com/Saqierma/miaowageo.git
 cd miaowageo
 npm install        # installs lighthouse only
-npm test           # 378 tests
+npm test           # 403 tests
 ```
 
 Requires Node.js >= 22.13.0. See [`deploy/README.md`](deploy/README.md).
@@ -920,7 +1083,26 @@ A: Free, no registration. Basic rate limiting to prevent abuse.
 A: See Principle 1. A composite score blends necessary conditions, measurements and speculation into one number that looks precise but maps to no concrete action.
 
 **Q: Will the check burden my site?**
-A: No. The light audit issues 7 throttled requests in total (preflight normalisation, robots.txt, the page, sitemap.xml, llms.txt, agents.md, /.well-known/ucp) and never retries on failure. Our outbound requests identify themselves: `MiaowaGEO-Audit/1.0 (+https://miaowageo.com/geocheck; contact@miaowageo.com)` — you can find us in your own access logs.
+A: A full check issues **16 requests in total**, all throttled, never retried on failure. The breakdown:
+
+| Stage | Count | What it requests | Identifying as |
+| --- | --- | --- | --- |
+| Light audit | 7 | preflight normalisation, robots.txt, the page, sitemap.xml, llms.txt, agents.md, /.well-known/ucp | `MiaowaGEO-Audit/1.0 (+https://miaowageo.com/geocheck; contact@miaowageo.com)` |
+| UA differential probe | 7 | the same page, once each | **byte-for-byte spoofs** of Chrome, curl, Googlebot, OAI-SearchBot, GPTBot, ClaudeBot, PerplexityBot |
+| Probe support requests | 2 | robots.txt (the probe obeys it too) and /ads.txt | our own identity |
+
+> **Those 7 spoofed requests need saying plainly.** It is the one place this tool does not appear in
+> your logs under its own name — **you will see GPTBot, ClaudeBot and the others in your access log,
+> and that is not them, it is us.**
+>
+> The spoofs are byte-exact rather than suffixed because WAF rules frequently match on exact strings;
+> a suffix would cause some rules to miss, and the resulting "not blocked" would be false. To
+> compensate, every probe carries an extra
+> `X-Probed-By: MiaowaGEO-Audit (+https://miaowageo.com/geocheck)` header — **filter your logs on that
+> header and you can separate us from the real crawlers.**
+>
+> Probes are issued serially under the shared per-origin throttle, and `robots.txt` is still obeyed:
+> if a path is disallowed, not one probe is sent.
 
 ---
 

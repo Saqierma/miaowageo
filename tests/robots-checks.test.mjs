@@ -99,7 +99,7 @@ test("GPTBot 自己被封禁时仍是 advisory、仍不进分母", () => {
 
 test("robots.txt 取不到时，绝不报成「全部放行」", () => {
   const results = robotsChecks({ ok: false, reason: "throttled", status: 429 }, "u");
-  assert.equal(results.length, 14);
+  assert.equal(results.length, 16);
   for (const item of results) {
     assert.equal(item.state, "no_data", `${item.id} 未测到时不得是 ready`);
     assert.equal(item.verdict, null, `${item.id} 未测到时不得携带 verdict`);
@@ -158,12 +158,12 @@ test("C3：重复的 User-agent: * 分组合并后，observation 提到实际放
 /**
  * 任务 9：SPA 兜底路由对任意路径（包括 /robots.txt）返回 HTML 时，
  * parseRobots 已经在解析层判过 null，但这里要在 robotsChecks 整条链路上
- * 断言：14 项全部是 ready + open（等价于放行），而不仅仅是解析器层面正确。
+ * 断言：16 项全部是 ready + open（等价于放行），而不仅仅是解析器层面正确。
  */
-test("SPA 兜底返回 HTML 时，robotsChecks 全部 14 项仍是 ready", () => {
+test("SPA 兜底返回 HTML 时，robotsChecks 全部 16 项仍是 ready", () => {
   const outcome = okText(`<!doctype html><html><body><div id="app"></div></body></html>`);
   const results = robotsChecks(outcome);
-  assert.equal(results.length, 14);
+  assert.equal(results.length, 16);
   for (const item of results) assert.equal(item.state, "ready", `${item.id} 应为 ready`);
 });
 

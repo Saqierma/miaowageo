@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { PROBES, PROBE_IDENTITY_HEADER, runUaMatrix, interpretMatrix, uaMatrixChecks } from "../src/probe/ua-matrix.mjs";
+import { PROBES, PROBE_IDENTITY_HEADER, runUaMatrix, interpretMatrix, uaMatrixChecks, stripBodies } from "../src/probe/ua-matrix.mjs";
 import { runProbeAudit } from "../src/orchestrate-probe.mjs";
 
 /**
@@ -290,4 +290,70 @@ test("**baseline_failed 要说明「这不是按 UA 拦的」**", () => {
   assert.match(r.limitation, /不是按 User-Agent/);
   assert.match(r.limitation, /TLS 指纹|JS 质询/);
   assert.match(r.limitation, /无头浏览器/, "要指路到真正能说明问题的那几项");
+});
+
+// ---------------------------------------------------------------------------
+// 对照探针的前提正在被一个外部事件推翻
+//
+// 这套判定的地基是「几乎没有人会故意封 Googlebot」。2026-09-15 起，
+// Cloudflare 把 Googlebot / Bingbot / Applebot 归为多用途爬虫，
+// 在含广告页面上按最严格规则默认封禁训练类爬虫——适用于新客户、
+// 现有客户的新站点与**全部免费套餐用户**。
+//
+// 那之后，Googlebot 的 403 会有一个与「已验证机器人校验」毫无关系的成因。
+// 若继续说「真 GPTBot 可能进得去」，我们就在**放行方向上说错话**，
+// 那比说不出结论糟得多。
+// ---------------------------------------------------------------------------
+
+test("**两个旁证齐备时，改判 control_ambiguous，不再单说验证机制**", () => {
+  const rows = matrix({ control: 403, ai: 403 });
+  const m = interpretMatrix(rows, { vendorId: "cloudflare", adMonetized: true });
+  assert.equal(m.kind, "control_ambiguous");
+
+  const [r] = uaMatrixChecks(rows, "https://x.example/", null, { vendorId: "cloudflare", adMonetized: true });
+  assert.equal(r.verdict, "warn", "两种解释里有一种意味着真爬虫进得去，判 fail 就是指控没观测到的事");
+  assert.match(r.limitation, /两种解释/);
+  assert.match(r.limitation, /2026-09-15/, "要写明这个时间点，用户才知道该不该现在去看");
+  assert.match(r.limitation, /控制台/, "要给出可自查的下一步");
+});
+
+test("**旁证不全时必须退回 verification，不许自行脑补**", () => {
+  // 没有证据就不启用新分支——宁可少说一种可能，不可凭空多说一种。
+  const rows = matrix({ control: 403, ai: 403 });
+  for (const ctx of [
+    {},
+    { vendorId: "cloudflare" },
+    { adMonetized: true },
+    { vendorId: "fastly", adMonetized: true },
+    { vendorId: "cloudflare", adMonetized: false },
+  ]) {
+    assert.equal(interpretMatrix(rows, ctx).kind, "verification", JSON.stringify(ctx));
+  }
+});
+
+test("对照正常时，旁证再全也不该走这一支", () => {
+  // control_ambiguous 只解释「对照为什么会被拦」，对照没被拦就无从谈起。
+  const m = interpretMatrix(matrix({ ai: 403 }), { vendorId: "cloudflare", adMonetized: true });
+  assert.equal(m.kind, "ai_blocked");
+});
+
+test("**矩阵进 evidence 前必须剥掉正文**", () => {
+  // 正文只在进程内用一次（广告脚本检测）。它会一路进数据库、进报告页的表格——
+  // 把第三方站点的 HTML 带过去，既撑大存储，也等于把别人的内容搬进我们的页面。
+  const rows = matrix({ ai: 403 }).map((r) => ({ ...r, body: "<html>secret</html>" }));
+  const [item] = uaMatrixChecks(rows, "https://x.example/");
+  const serialized = JSON.stringify(item.evidence);
+  assert.ok(!serialized.includes("secret"), "第三方页面正文泄进了 evidence");
+  assert.ok(!serialized.includes('"body"'), "evidence 里不该有 body 字段");
+});
+
+test("stripBodies 只删 body，其余字段一个不少", () => {
+  const rows = matrix({ ai: 403 }).map((r) => ({ ...r, body: "x" }));
+  const out = stripBodies(rows);
+  assert.equal(out.length, rows.length);
+  for (let i = 0; i < rows.length; i += 1) {
+    const { body, ...expected } = rows[i];
+    void body;
+    assert.deepEqual(out[i], expected);
+  }
 });

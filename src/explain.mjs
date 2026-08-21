@@ -619,6 +619,140 @@ export const CHECK_EXPLANATIONS = Object.freeze({
         "Those three cases are indistinguishable from the outside.",
     },
   },
+
+  // ── 片段级抑制 ────────────────────────────────────────────────────
+  "access.snippet": {
+    zh: {
+      what:
+        "检查页面有没有声明「不许摘录我的文字」——包括 meta robots 与 X-Robots-Tag 里的 " +
+        "`nosnippet`、`max-snippet`、`noarchive`，以及 HTML 里逐块生效的 `data-nosnippet` 属性。",
+      risk:
+        "这一条和 noindex 是两回事，而且**更隐蔽**。noindex 是「整页从搜索里消失」，很显眼；" +
+        "`nosnippet` 是「页面还在索引里，但任何一句话都不许被摘出来展示」。" +
+        "**生成式引擎的引用，本质就是摘录一段话**——不许摘录，就等于不可能被引用。" +
+        "而在传统 SEO 的报告里，它几乎看不出任何异常，所以从来没人查。",
+      fix:
+        "让维护网站的人在 `<head>` 里找 `<meta name=\"robots\">`，以及服务器有没有返回 " +
+        "`X-Robots-Tag`，把 `nosnippet` 与 `max-snippet:0` 去掉。" +
+        "**如果用了 `data-nosnippet`，重点确认它包住的到底是什么**——" +
+        "它常被用来遮价格或时间戳，而一个没收好的标签就能把整段正文包进去，" +
+        "页面在浏览器里看起来毫无异样。",
+    },
+    en: {
+      what:
+        "Checks whether the page declares that its text may not be quoted — `nosnippet`, `max-snippet` and " +
+        "`noarchive` in meta robots or the X-Robots-Tag header, plus the per-block `data-nosnippet` attribute in the HTML.",
+      risk:
+        "This is a different thing from noindex, and **a far quieter one**. noindex means the page disappears from " +
+        "search entirely — very visible. `nosnippet` means the page stays in the index but **not one sentence of it " +
+        "may be displayed**. Citation by a generative engine is, at bottom, quoting a passage — forbid quoting and " +
+        "being cited becomes impossible. In a conventional SEO report this looks like almost nothing, which is why " +
+        "nobody checks it.",
+      fix:
+        "Have whoever maintains the site look for `<meta name=\"robots\">` in `<head>` and for an `X-Robots-Tag` " +
+        "response header, and remove `nosnippet` and `max-snippet:0`. " +
+        "**If `data-nosnippet` is in use, check what it actually wraps** — it is typically meant to hide a price or " +
+        "a timestamp, but one unclosed tag can swallow the whole article body, and the page looks perfectly normal in a browser.",
+    },
+  },
+
+  // ── robots.txt 归属 ───────────────────────────────────────────────
+  "access.robots-provenance": {
+    zh: {
+      what:
+        "这份 `robots.txt` 里，哪几行是你自己写的，哪几行是 CDN 替你加的。" +
+        "Cloudflare 的托管 robots.txt 会把它自己的内容**拼在你的文件前面**，合成一个响应返回。",
+      risk:
+        "看到「ClaudeBot 被禁」时，你的第一反应很可能是「我们没写过这个」——**你是对的**。" +
+        "那可能确实不是你写的，而是托管功能的默认值。搞不清是谁写的，你会去改一个根本不存在的地方。",
+      fix:
+        "如果上面写着某几行由 CDN 注入，**去那家厂商的控制台改，不用动你的源站文件**；" +
+        "如果写着整份来自源站，那就是你自己的 `robots.txt`，改文件本身。" +
+        "**我们认不出时会直说认不出**，不猜——把 CDN 的规则算到你头上，比不给这条信息更糟。",
+    },
+    en: {
+      what:
+        "Which lines of this `robots.txt` you wrote, and which were added on your behalf by a CDN. " +
+        "Cloudflare's managed robots.txt **prepends its own content to your file** and serves the two as one response.",
+      risk:
+        "When you see \"ClaudeBot is disallowed\", your first thought is probably \"we never wrote that\" — **and you may " +
+        "well be right**. It can be the managed feature's default rather than your configuration. Not knowing who wrote a " +
+        "line means editing something that isn't where you think it is.",
+      fix:
+        "If the finding above says some lines were CDN-injected, **change them in that vendor's console — you do not need " +
+        "to touch your origin file**. If it says the whole file comes from your origin, then it is your own `robots.txt`. " +
+        "**When we cannot tell, we say so** rather than guessing — attributing a CDN's rule to you would be worse than " +
+        "not offering this information at all.",
+    },
+  },
+
+  // ── Content-Signal ───────────────────────────────────────────────
+  "access.content-signal": {
+    zh: {
+      what:
+        "`robots.txt` 里的 `Content-Signal` 声明，用三个字段表达你对内容用途的偏好：" +
+        "`search`（建索引）、`ai-input`（作为 AI 实时回答的输入）、`ai-train`（训练模型）。",
+      risk:
+        "**这一项不计分，因为目前没有任何爬虫或 LLM 读取它。** Google 已公开表示该指令" +
+        "对任何爬虫或 LLM 都没有效果。我们呈现它，是因为它记录了一个**意图**。",
+      fix:
+        "没声明不用管，缺它不影响你被抓取或被引用。" +
+        "**要留意的是它的取值可能不是你设的**：托管 robots.txt 的默认值是 " +
+        "`search=yes, ai-train=no`，而 `ai-input` 会被刻意留空。" +
+        "`ai-train=no` 通常是深思熟虑的版权决定，而 `ai-input` 留空往往只是没人设过——" +
+        "这两件事值得分开看。",
+    },
+    en: {
+      what:
+        "The `Content-Signal` declaration in `robots.txt`, which states your preference across three fields: " +
+        "`search` (indexing), `ai-input` (feeding a live AI answer) and `ai-train` (training a model).",
+      risk:
+        "**This item is not scored, because no crawler or LLM currently reads it.** Google has stated publicly that the " +
+        "directive has no effect on any crawler or LLM. We surface it because it records an **intent**.",
+      fix:
+        "If it is absent, nothing needs doing — its absence does not affect whether you can be crawled or cited. " +
+        "**What is worth noticing is that the values may not be yours**: managed robots.txt defaults to " +
+        "`search=yes, ai-train=no` and deliberately leaves `ai-input` unset. `ai-train=no` is usually a considered " +
+        "copyright decision; a blank `ai-input` usually just means nobody ever set it. Those are different things.",
+    },
+  },
+
+  // ── 边缘层 AI 策略 ────────────────────────────────────────────────
+  "access.edge-ai-policy": {
+    zh: {
+      what:
+        "你的网站前面那层 CDN，会不会在近期**改变对 AI 爬虫的默认处理**。" +
+        "目前跟踪的是 Cloudflare 已公布的一项变更：自 2026-09-15 起，" +
+        "在**含广告的页面**上默认封禁训练类爬虫。",
+      risk:
+        "这项变更适用于新客户、现有客户的新站点与**全部免费套餐用户**（现有付费客户不受自动影响）。" +
+        "更要紧的是：Cloudflare 把 **Googlebot、Bingbot、Applebot 归为「多用途爬虫」**——" +
+        "它们同时做搜索与训练，会按最严格的规则一起被拦。" +
+        "**也就是说，一个只想挡住 AI 训练的设置，可能连搜索收录一起挡掉。**",
+      fix:
+        "进 Cloudflare 控制台 → Security → Settings → AI 爬虫策略，确认训练类的封禁范围；" +
+        "**并为 Googlebot、Bingbot 单独写放行规则**，否则搜索收录会被一起波及。" +
+        "套餐层级与账号新旧从站外看不到，所以我们只能告诉你去哪儿确认，" +
+        "**不能替你断定你是否在适用范围内**。",
+    },
+    en: {
+      what:
+        "Whether the CDN in front of your site is about to **change its default handling of AI crawlers**. " +
+        "We currently track one announced change: from 2026-09-15 Cloudflare blocks training-class crawlers by " +
+        "default **on pages that carry advertising**.",
+      risk:
+        "The change applies to new customers, new sites created by existing customers, and **all existing free-tier " +
+        "users** (existing paid customers are not affected automatically). More importantly, Cloudflare classifies " +
+        "**Googlebot, Bingbot and Applebot as multi-purpose crawlers** — they serve both search and training, and the " +
+        "most restrictive applicable rule wins. **A setting intended only to keep AI training out can therefore take " +
+        "your search indexing with it.**",
+      fix:
+        "In the Cloudflare dashboard go to Security → Settings → AI crawler policies and check the scope of the " +
+        "training block, **then write explicit allow rules for Googlebot and Bingbot** so that search indexing is not " +
+        "caught in the same net. Plan tier and account age are not visible from outside, so we can only tell you where " +
+        "to confirm — **we cannot determine on your behalf whether you fall inside the affected group**.",
+    },
+  },
 });
 
 /** 把任意输入收敛成受支持的语言，非法值一律回落中文。 */

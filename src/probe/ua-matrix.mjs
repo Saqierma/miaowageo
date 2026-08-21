@@ -153,9 +153,24 @@ export async function runUaMatrix(pageUrl, deps = {}) {
       reason: outcome?.reason === "too_large" ? null : (outcome?.reason ?? null),
       headers: outcome?.headers ?? {},
       finalUrl: outcome?.finalUrl ?? null,
+      // 只留正文片段，供广告脚本检测用（见 orchestrate-probe 的 detectAdMonetization）。
+      // **不进 evidence**：整份报告会原样存库并渲染成表格，把第三方站点的
+      // HTML 片段带进去，既撑大存储也把别人的内容搬进了我们的页面。
+      body: typeof outcome?.body === "string" ? outcome.body : null,
     });
   }
   return rows;
+}
+
+/**
+ * 剥掉行里的 `body`，供写进 evidence。
+ *
+ * 矩阵整个会进 evidence、存进数据库、再渲染成报告页上的表格。
+ * 把第三方站点的 HTML 片段一路带过去，既撑大存储，也等于把别人的内容
+ * 搬进了我们自己的页面。正文只在进程内用一次（广告脚本检测），用完就扔。
+ */
+export function stripBodies(rows) {
+  return (rows ?? []).map(({ body, ...rest }) => { void body; return rest; });
 }
 
 // ---------------------------------------------------------------------------
@@ -170,11 +185,36 @@ export async function runUaMatrix(pageUrl, deps = {}) {
  *   all_open          —— 这一层没有拦截
  *   ai_blocked        —— 有针对 AI 爬虫的规则（结论扎实）
  *   verification      —— 在做已验证机器人校验，**我们无法判定真爬虫会不会被拦**
+ *   control_ambiguous —— 对照被拦，但有第二种同样成立的解释（见下）
  *   non_browser_block —— 拦的是所有非浏览器客户端
  *   baseline_failed   —— 连普通浏览器都进不去，这一层测不了
  *   inconclusive      —— 数据不足
+ *
+ * ---------------------------------------------------------------------------
+ * 对照探针的前提正在被一个外部事件推翻
+ *
+ * 这套判定的地基是「几乎没有人会故意封 Googlebot」——所以 Googlebot 也被拦，
+ * 就说明站点拦的是「未经验证的机器人声明」，而不是针对 AI。
+ *
+ * **2026-09-15 起这个前提在一大类站点上不再成立。** Cloudflare 把 Googlebot、
+ * Bingbot、Applebot 归为「多用途爬虫」（同时做搜索与训练），并按**最严格的
+ * 适用规则**处理；含广告页面上训练类默认封禁，适用于新客户、现有客户的新站点
+ * 与**全部免费套餐用户**。也就是说：Cloudflare + 免费套餐 + 含广告的页面上，
+ * Googlebot 会因为一个与「已验证机器人校验」毫无关系的理由拿到 403。
+ *
+ * 若继续照 verification 那一支说「真 GPTBot 可能进得去」，我们会在**放行方向上
+ * 说错话**——那比说不出结论糟得多。所以拿到这两个旁证（厂商是 Cloudflare、
+ * 页面含广告）时，改判 control_ambiguous：**两种解释都摆出来，不二选一。**
+ *
+ * 依据：Cloudflare 官方博客「multi-purpose crawlers such as Googlebot, Applebot,
+ * and BingBot will be blocked by customers who have selected to block Training」。
+ *
+ * @param {Array} rows
+ * @param {{vendorId?: string|null, adMonetized?: boolean|null}} [context]
+ *   旁证。拿不到时按 null 处理，判定退回原来的 verification——
+ *   **没有证据就不启用新分支**，宁可少说一种可能。
  */
-export function interpretMatrix(rows) {
+export function interpretMatrix(rows, context = {}) {
   const by = (role) => (rows ?? []).filter((r) => r.role === role);
   const baseline = by("baseline")[0];
   const generic = by("generic")[0];
@@ -196,8 +236,12 @@ export function interpretMatrix(rows) {
   // 这一支必须优先于 ai_blocked：几乎没有人会故意封 Googlebot，
   // 它挂了说明拦的是「未经验证的机器人声明」，真爬虫可能验证得过。
   if (control && !reachable(control.status)) {
+    // 两个旁证同时成立时，「已验证机器人校验」不再是唯一解释：
+    // Cloudflare 自 2026-09-15 起在含广告页面默认封禁训练类爬虫，
+    // 而 Googlebot 被它归为多用途爬虫，会一起被拦。见函数头注释。
+    const edgePolicySuspected = context?.vendorId === "cloudflare" && context?.adMonetized === true;
     return {
-      kind: "verification",
+      kind: edgePolicySuspected ? "control_ambiguous" : "verification",
       blockedAi,
       controlStatus: control.status,
       baselineStatus: baseline.status,
@@ -230,6 +274,10 @@ const OBSERVATION = {
   verification: (m) =>
     `${m.blockedAi.map((r) => r.label).join("、")} 的身份被拒绝，` +
     `但作为对照的 Googlebot 身份同样被拒绝（HTTP ${m.controlStatus ?? "无响应"}）。`,
+  control_ambiguous: (m) =>
+    `${m.blockedAi.map((r) => r.label).join("、")} 的身份被拒绝，` +
+    `作为对照的 Googlebot 身份同样被拒绝（HTTP ${m.controlStatus ?? "无响应"}）——` +
+    "而该站点在 Cloudflare 后面且页面含广告，这使对照失去了区分力。",
   non_browser_block: (m) =>
     `该站点拒绝所有非浏览器客户端：curl 身份返回 HTTP ${m.genericStatus ?? "无响应"}，` +
     `${m.blockedAi.length} 个 AI 爬虫身份同样被拒绝。`,
@@ -239,6 +287,17 @@ const OBSERVATION = {
 };
 
 const LIMITATION = {
+  control_ambiguous:
+    "**这里有两种解释，我们分不开，所以两条都摆出来：**\n" +
+    "（一）该站点在做「已验证机器人」校验，拦的是未经验证的身份声明——" +
+    "这种情况下真正的 GPTBot、ClaudeBot 走官方 IP 段，很可能进得来。\n" +
+    "（二）**Cloudflare 自 2026-09-15 起，在含广告的页面上默认封禁训练类爬虫**，" +
+    "而它把 Googlebot 归为「多用途爬虫」（同时做搜索与训练），按最严格的规则一起拦下。" +
+    "这项默认变更适用于新客户、现有客户的新站点与**全部免费套餐用户**。" +
+    "这种情况下真爬虫是真的被拦了。\n" +
+    "该站点同时满足「在 Cloudflare 后面」与「页面含广告」两个条件，所以第二种解释成立得起来。" +
+    "**要分辨，只能看你自己那一侧**：Cloudflare 控制台 → Security → Settings → " +
+    "AI 爬虫策略，看训练类是否被封禁、以及 Googlebot 有没有单独放行的规则。",
   all_open:
     "本项只测这一个页面在这一刻的响应，不代表全站、也不代表其他时段；" +
     "能取得内容也不等于会被收录或引用。",
@@ -269,6 +328,8 @@ const VERDICT = {
   ai_blocked: "fail",
   // **不是 fail。** 我们没测出真爬虫被拦，判 fail 就是在指控一件没观测到的事。
   verification: "warn",
+  // 同理。两种解释里有一种意味着真爬虫进得去，判 fail 同样是指控没观测到的事。
+  control_ambiguous: "warn",
   non_browser_block: "fail",
 };
 
@@ -278,7 +339,7 @@ const VERDICT = {
  * @param {object|null} [failureOutcome] 整个探针阶段没跑成时传进来
  * @returns {object[]} CheckResult[]
  */
-export function uaMatrixChecks(rows, pageUrl, failureOutcome = null) {
+export function uaMatrixChecks(rows, pageUrl, failureOutcome = null, context = {}) {
   if (failureOutcome) {
     const s = outcomeToState(failureOutcome);
     return [
@@ -294,7 +355,7 @@ export function uaMatrixChecks(rows, pageUrl, failureOutcome = null) {
     ];
   }
 
-  const m = interpretMatrix(rows);
+  const m = interpretMatrix(rows, context);
   const verdict = VERDICT[m.kind];
 
   if (!verdict) {
@@ -316,7 +377,7 @@ export function uaMatrixChecks(rows, pageUrl, failureOutcome = null) {
         //
         // 「没测到」≠「没有结论可报」：我们没测出准入状态，但**测出了
         // 拦截不按 UA 走**，那是一条实打实的观测。
-        evidence: { url: pageUrl, matrix: rows, interpretation: m.kind },
+        evidence: { url: pageUrl, matrix: stripBodies(rows), interpretation: m.kind },
       }),
     ];
   }
@@ -332,7 +393,7 @@ export function uaMatrixChecks(rows, pageUrl, failureOutcome = null) {
       limitation: LIMITATION[m.kind],
       // 整张矩阵进 evidence：报告页要把它渲染成表格，
       // 而「能一眼数回到原始观测」是这个项目的既有约定。
-      evidence: { url: pageUrl, matrix: rows, interpretation: m.kind },
+      evidence: { url: pageUrl, matrix: stripBodies(rows), interpretation: m.kind },
     }),
   ];
 }

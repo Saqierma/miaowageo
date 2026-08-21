@@ -81,7 +81,7 @@ test("「该资源确实不存在」的三处都在 404 上判 ready，不进未
   }
 });
 
-test("robots.txt 抓不到时，14 项爬虫准入全部记成对方侧原因", () => {
+test("robots.txt 抓不到时，16 项爬虫准入全部记成对方侧原因", () => {
   const results = robotsChecks(
     { ok: false, status: null, headers: {}, body: null, finalUrl: `${PAGE}robots.txt`, reason: "timeout" },
     `${PAGE}robots.txt`,
