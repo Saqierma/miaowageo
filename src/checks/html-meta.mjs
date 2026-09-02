@@ -1,5 +1,6 @@
 import { checkResult } from "../types.mjs";
 import { outcomeToState, OK } from "./fetch-outcome.mjs";
+import { stripNoise, displayWidth } from "./html-text.mjs";
 
 /**
  * 基础技术 SEO：页面元信息与国际化。**纯函数，输入已抓到的 HTML。**
@@ -23,25 +24,31 @@ import { outcomeToState, OK } from "./fetch-outcome.mjs";
  * 阈值的来源，以及为什么它只是近似
  *
  * title 与 description 的长度区间来自 Google 搜索结果的实际截断行为，
- * 而 Google 截断按**像素宽度**算，不按字符数——中文字符比拉丁字符宽得多。
- * 这里用字符数做近似，并在 limitation 里如实写明这是近似。
+ * 而 Google 截断按**像素宽度**算，不按字符数——中文字符约是拉丁字符的两倍宽。
+ *
+ * 最初的实现直接数字符、阈值按中文校准（标题上限 30），于是一个 56 字符的
+ * 正常英文标题会被系统性判 warn——对以英文站为主的外贸客户，这是打在
+ * 核心场景上的误报（GitHub issue #1）。
+ *
+ * 修法是把**上限**换成按显示宽度（html-text.mjs 的 displayWidth，
+ * 全角计 2、半角计 1）比较：截断是物理现象，量的就该是宽度。
+ * 60 单位 ≈ 中文 30 字 ≈ 英文 60 字符，与 explain.mjs 中英文各自的
+ * 建议数字一致。**下限保持按字符数**：下限量的是「说没说清主题」这个
+ * 信息量，中文每字信息密度更高，同一字符数下限对两种文字同样成立——
+ * 若把下限也按宽度翻倍，12 字符的正常英文标题（如已发布案例 03 的
+ * "home - Kutuo"）会在下界产生与 issue #1 同类的新误报。
+ *
+ * 折算后仍是近似——比例字体下同为半角的 i 和 W 宽度并不相同。
  * **不要把近似说成精确**，那正是这个工具最不能犯的错。
  */
 
 // ---------------------------------------------------------------------------
 // 解析
 //
-// 一律先剥掉 script/style/注释再解析。顺序很重要：脚本里常有含
-// `<title>` 或 `<img>` 字样的模板字符串，先去噪才不会把它们当成页面内容。
-// 这与 static-readability.mjs 里 visibleTextLength 的做法一致。
+// 一律先剥掉 script/style/注释（html-text.mjs 的 stripNoise）再解析。
+// 顺序很重要：脚本里常有含 `<title>` 或 `<img>` 字样的模板字符串，
+// 先去噪才不会把它们当成页面内容。
 // ---------------------------------------------------------------------------
-
-function stripNoise(html) {
-  return String(html ?? "")
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<!--[\s\S]*?-->/g, " ");
-}
 
 function decodeEntities(text) {
   return String(text ?? "")
@@ -122,13 +129,20 @@ export function imgAltCoverage(html) {
 // 检查项
 // ---------------------------------------------------------------------------
 
-const TITLE_MIN = 10;
-const TITLE_MAX = 30;
-const DESC_MIN = 50;
-const DESC_MAX = 120;
+// 下限单位是**字符数**（量信息量，两种文字同一口径，沿用旧值）；
+// 上限单位是**半角字符宽度**（displayWidth，量物理截断）。
+// 标题上限 60 单位 ≈ 中文 30 字 ≈ 英文 60 字符。
+// 描述上限 160 单位 ≈ 中文 80 字 ≈ 英文 160 字符——旧实现允许中文到
+// 120 字，但搜索结果对中文摘要的实际展示只有 70–90 字，explain.mjs 的
+// 建议也是 70–80 字，旧上限本身把话说满了，这里一并校准。
+const TITLE_MIN_CHARS = 10;
+const TITLE_MAX_WIDTH = 60;
+const DESC_MIN_CHARS = 50;
+const DESC_MAX_WIDTH = 160;
 
 const GROUP = "metadata";
-const LENGTH_CAVEAT = "长度阈值按字符数近似，Google 实际按像素宽度截断，中文字符更宽。";
+const LENGTH_CAVEAT =
+  "宽度按「全角计 2、半角计 1」近似折算，Google 实际按像素宽度截断，比例字体下同为半角的字符宽度也不同。";
 
 function unavailable(id, state, suffix, url) {
   return checkResult({
@@ -189,16 +203,17 @@ function titleCheck(html, evidence) {
     });
   }
   const n = [...title].length;
-  const verdict = n >= TITLE_MIN && n <= TITLE_MAX ? "pass" : "warn";
+  const width = displayWidth(title);
+  const verdict = n >= TITLE_MIN_CHARS && width <= TITLE_MAX_WIDTH ? "pass" : "warn";
   return checkResult({
     id: "metadata.title", group: GROUP, scored: true, state: "ready", verdict,
-    observation: `页面标题共 ${n} 个字符：「${title.slice(0, 60)}${title.length > 60 ? "…" : ""}」`,
+    observation: `页面标题共 ${n} 个字符，宽度约合 ${width} 个半角字符：「${title.slice(0, 60)}${title.length > 60 ? "…" : ""}」`,
     limitation:
       verdict === "pass"
         ? null
-        : n < TITLE_MIN
-          ? `短于 ${TITLE_MIN} 字符，可能不足以说明页面主题。${LENGTH_CAVEAT}`
-          : `长于 ${TITLE_MAX} 字符，在搜索结果中可能被截断。${LENGTH_CAVEAT}`,
+        : n < TITLE_MIN_CHARS
+          ? `短于 ${TITLE_MIN_CHARS} 个字符，可能不足以说明页面主题。`
+          : `宽度超过 ${TITLE_MAX_WIDTH} 个半角字符（约合中文 ${TITLE_MAX_WIDTH / 2} 字或英文 ${TITLE_MAX_WIDTH} 字符），在搜索结果中可能被截断。${LENGTH_CAVEAT}`,
     evidence,
   });
 }
@@ -214,11 +229,17 @@ function descriptionCheck(html, evidence) {
     });
   }
   const n = [...desc].length;
-  const verdict = n >= DESC_MIN && n <= DESC_MAX ? "pass" : "warn";
+  const width = displayWidth(desc);
+  const verdict = n >= DESC_MIN_CHARS && width <= DESC_MAX_WIDTH ? "pass" : "warn";
   return checkResult({
     id: "metadata.description", group: GROUP, scored: true, state: "ready", verdict,
-    observation: `meta description 共 ${n} 个字符。`,
-    limitation: verdict === "pass" ? null : `建议 ${DESC_MIN}–${DESC_MAX} 字符。${LENGTH_CAVEAT}`,
+    observation: `meta description 共 ${n} 个字符，宽度约合 ${width} 个半角字符。`,
+    limitation:
+      verdict === "pass"
+        ? null
+        : n < DESC_MIN_CHARS
+          ? `短于 ${DESC_MIN_CHARS} 个字符，可能不足以概括页面内容。`
+          : `宽度超过 ${DESC_MAX_WIDTH} 个半角字符（约合中文 ${DESC_MAX_WIDTH / 2} 字或英文 ${DESC_MAX_WIDTH} 字符），超出部分在搜索结果中不会展示。${LENGTH_CAVEAT}`,
     evidence,
   });
 }

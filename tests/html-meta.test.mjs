@@ -12,6 +12,7 @@ import {
   hasResponsiveViewport,
   imgAltCoverage,
 } from "../src/checks/html-meta.mjs";
+import { displayWidth } from "../src/checks/html-text.mjs";
 
 /**
  * 基础技术 SEO 的八项检查。
@@ -74,9 +75,10 @@ test("缺 title 判 fail，并说明后果", () => {
   assert.match(r.limitation, /引擎会自行拼凑/);
 });
 
-test("title 长度按**字符数**判，且 limitation 必须承认这是近似", () => {
-  // Google 按像素宽度截断，中文字符更宽。把近似说成精确，正是这个工具
-  // 最不该犯的错——所以超限时必须带上这句说明。
+test("title 超限时 limitation 必须承认宽度折算仍是近似", () => {
+  // Google 按像素宽度截断，我们按「全角 2 / 半角 1」折算——比纯字符数
+  // 准得多，但仍是近似（比例字体下 i 和 W 也不一样宽）。
+  // 把近似说成精确，正是这个工具最不该犯的错——所以超限时必须带上说明。
   const long = byId(run(`<title>${"标".repeat(50)}</title>`), "metadata.title");
   assert.equal(long.verdict, "warn");
   assert.match(long.limitation, /近似/);
@@ -85,6 +87,64 @@ test("title 长度按**字符数**判，且 limitation 必须承认这是近似"
   const good = byId(run("<title>妙蛙 GEO 海外搜索可见性检测</title>"), "metadata.title");
   assert.equal(good.verdict, "pass");
   assert.equal(good.limitation, null, "合格时不该编一条限制说明出来");
+});
+
+test("长度按**视觉宽度**折算：全角计 2、半角计 1、组合标记计 0", () => {
+  // Google 按像素宽度截断，中文字符约是拉丁字符的两倍宽。
+  // 折算后同一套上限对两种文字都成立：60 半角单位 ≈ 中文 30 字 ≈ 英文 60 字符——
+  // 这正是 explain.mjs 里中英文建议（30 字 / 60 characters）各自的数字。
+  assert.equal(displayWidth("abcde"), 5);
+  assert.equal(displayWidth("中文标题"), 8);
+  assert.equal(displayWidth("Acme阀门"), 8, "混排：4 半角 + 2 全角");
+  assert.equal(displayWidth("，。"), 4, "全角标点也是全角宽");
+
+  // 组合标记不占宽。NFD 形态的重音、越南语声调若各计 1，
+  // 一个正常长度的越南语标题会被凭空推过上限。
+  assert.equal(displayWidth("Café".normalize("NFD")), 4, "分解形态与合成形态同宽");
+  assert.equal(displayWidth("Café".normalize("NFC")), 4);
+  assert.equal(displayWidth("👨‍👩‍👧"), 6, "ZWJ 计 0；仍是近似（实际约 2），但不再把连接符也算进去");
+});
+
+test("正常长度的英文标题不得再被判 warn（issue #1）", () => {
+  // 60 个拉丁字符的标题在搜索结果里不会被截断。旧实现按字符数
+  // 与中文共用 30 的上限，等于给所有写得规范的英文站各扣一个莫须有的 warn。
+  const title = "Acme Stainless Steel Pipe Supplier | ISO 9001 Certified"; // 56 字符
+  const r = byId(run(`<title>${title}</title>`), "metadata.title");
+  assert.equal(r.verdict, "pass", `56 个拉丁字符应为 pass，实得 ${r.verdict}：${r.limitation}`);
+
+  // 真正过长的英文标题（>60 半角单位）仍要如实警告。
+  const long = byId(run(`<title>${"word ".repeat(16)}end</title>`), "metadata.title");
+  assert.equal(long.verdict, "warn");
+});
+
+test("下限按**字符数**判，不随宽度翻倍（评审发现的反向误报）", () => {
+  // 下限量的是「说没说清主题」这个信息量，不是像素——中文每字信息
+  // 密度更高，同一字符数下限对两种文字同样成立。若下限也按宽度折算，
+  // 已发布案例 03 里 12 字符的正常英文标题「home - Kutuo」会从 pass
+  // 翻成 warn，在下界复刻 issue #1。
+  assert.equal(byId(run("<title>home - Kutuo</title>"), "metadata.title").verdict, "pass");
+  assert.equal(byId(run(`<meta name="description" content="${"x".repeat(53)}"><title>t</title>`), "metadata.description").verdict, "pass", "53 字符英文描述沿旧口径 pass");
+});
+
+test("纯中文标题的判定边界与旧实现完全一致", () => {
+  assert.equal(byId(run(`<title>${"标".repeat(30)}</title>`), "metadata.title").verdict, "pass", "30 个全角 = 60 单位，恰在上限");
+  assert.equal(byId(run(`<title>${"标".repeat(31)}</title>`), "metadata.title").verdict, "warn");
+  assert.equal(byId(run(`<title>${"标".repeat(10)}</title>`), "metadata.title").verdict, "pass", "10 个字符，恰在下限");
+  assert.equal(byId(run(`<title>${"标".repeat(9)}</title>`), "metadata.title").verdict, "warn");
+});
+
+test("description 上限校准到 160 单位：英文 160 字符、中文 80 字", () => {
+  // 英文侧：explain.mjs 的建议是 roughly 150 characters，150 必须 pass。
+  const en = "A".repeat(150);
+  assert.equal(byId(run(`<meta name="description" content="${en}">`), "metadata.description").verdict, "pass");
+  const enLong = "A".repeat(161);
+  assert.equal(byId(run(`<meta name="description" content="${enLong}">`), "metadata.description").verdict, "warn");
+
+  // 中文侧：这是本次**有意收紧**的一处——旧上限 120 字远超搜索结果的
+  // 实际展示（70–90 字），explain.mjs 自己的建议也是 70–80 字。
+  // 维持 120 等于对中文站把话说满。
+  assert.equal(byId(run(`<meta name="description" content="${"描".repeat(80)}">`), "metadata.description").verdict, "pass", "80 全角 = 160 单位，恰在上限");
+  assert.equal(byId(run(`<meta name="description" content="${"描".repeat(81)}">`), "metadata.description").verdict, "warn");
 });
 
 test("缺 description 判 fail：摘录内容不受站点控制", () => {

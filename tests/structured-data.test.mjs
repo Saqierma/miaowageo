@@ -28,6 +28,64 @@ test("完全没有 JSON-LD 判为 fail", () => {
   assert.equal(byId(structuredChecks(ok("<html></html>"), "u"), "structured.jsonld").verdict, "fail");
 });
 
+// ---------------------------------------------------------------------------
+// Microdata / RDFa 廉价探测（issue #2）
+//
+// 不少老建站系统和 WordPress 主题默认输出 Microdata。用它标注了完整
+// Organization 的站，被判成「未发现任何结构化数据」的 fail，是一个假结论。
+// 我们只探测、不解析——解析这两种老格式投入产出比不高，「疑似存在」
+// 降级为 warn 已经足够让报告说实话。
+// ---------------------------------------------------------------------------
+
+test("无 JSON-LD 但有 Microdata 标注 → warn 而不是 fail（issue #2）", () => {
+  const html = `<html><body>
+    <div itemscope itemtype="https://schema.org/Organization">
+      <span itemprop="name">Acme</span>
+    </div></body></html>`;
+  const r = byId(structuredChecks(ok(html), "u"), "structured.jsonld");
+  assert.equal(r.verdict, "warn", "完整的 Microdata 站不该与「什么都没有」同罪");
+  assert.match(r.observation, /Microdata/);
+  assert.match(r.observation, /疑似/, "我们没解析，不能把探测说成确认");
+  assert.match(r.limitation, /不解析|只探测/, "必须说明本工具不解析这两种格式");
+});
+
+test("无 JSON-LD 但有 RDFa 标注（typeof/vocab）→ warn", () => {
+  const html = `<html><body vocab="https://schema.org/" typeof="Organization">
+    <span property="name">Acme</span></body></html>`;
+  const r = byId(structuredChecks(ok(html), "u"), "structured.jsonld");
+  assert.equal(r.verdict, "warn");
+  assert.match(r.observation, /RDFa/);
+});
+
+test("只有 Open Graph 的页面仍判 fail：og 的 property= 不算 RDFa 探测命中", () => {
+  // 几乎每个现代页面都有 <meta property="og:...">。若把裸 property=
+  // 当成 RDFa 信号，fail 分支将几乎永远走不到，这项检查等于被废掉。
+  const html = `<html><head><meta property="og:title" content="A"></head><body></body></html>`;
+  assert.equal(byId(structuredChecks(ok(html), "u"), "structured.jsonld").verdict, "fail");
+});
+
+test("script 字符串里的 itemscope 不算数；class 撞名也不算", () => {
+  // 与 html-meta 的去噪原则一致：JS 模板字符串不是页面标注。
+  const inScript = `<html><script>const t = '<div itemscope itemtype="x">';</script><body></body></html>`;
+  assert.equal(byId(structuredChecks(ok(inScript), "u"), "structured.jsonld").verdict, "fail");
+
+  const classClash = `<html><body><div class="itemscope"></div></body></html>`;
+  assert.equal(byId(structuredChecks(ok(classClash), "u"), "structured.jsonld").verdict, "fail");
+});
+
+test("未闭合的 <script> 不得让 JS 源码冒充页面标注（评审发现）", () => {
+  // 浏览器把未闭合 script 之后的所有字节都当脚本文本，去噪必须照剥，
+  // 否则整段 JS 源码进入属性正则，fail 被误降级成 warn。
+  const html = `<html><script>var t = "<div itemscope itemtype=x>";`;
+  assert.equal(byId(structuredChecks(ok(html), "u"), "structured.jsonld").verdict, "fail");
+});
+
+test("已有 JSON-LD 时探测不介入，判定与原来一致", () => {
+  const html = `<html><head><script type="application/ld+json">{"@type":"Organization"}</script></head>
+    <body itemscope itemtype="https://schema.org/WebPage"></body></html>`;
+  assert.equal(byId(structuredChecks(ok(html), "u"), "structured.jsonld").verdict, "pass");
+});
+
 test("@graph 嵌套里的类型能被识别", () => {
   const results = structuredChecks(wrap(`{"@graph":[{"@type":"WebSite"},{"@type":"Organization"}]}`), "u");
   assert.equal(byId(results, "structured.jsonld").verdict, "pass");
