@@ -147,6 +147,15 @@ function parseDirective(line) {
   };
 }
 
+/** 会出现在一个 User-agent 组**内部**的指令。其余（如 Sitemap:）都是全局的，结束当前组。 */
+const GROUP_DIRECTIVES = new Set(["allow", "disallow", "content-signal", "crawl-delay"]);
+
+/** `/`、`/*`、`*` 都是「整站」，与 robots-parse.mjs 的 accessState 同口径。 */
+function isBlanketPath(value) {
+  const v = String(value ?? "").trim();
+  return v === "/" || v === "/*" || v === "*";
+}
+
 /** 这一行是不是纯注释（或空行）。 */
 function isCommentOrBlank(line) {
   const t = line.trim();
@@ -249,9 +258,17 @@ export function splitProvenance(text) {
       if (isCommentOrBlank(lines[cursor])) { cursor += 1; continue; }
       const d = parseDirective(lines[cursor]);
       if (!d || d.key === "user-agent") break;
+      // **只有组内指令才算这一组的行。** `Sitemap:` 这类全局指令不属于任何组，
+      // 遇到就结束当前组，交回外层——外层会按「组外散装指令」停止切分。
+      // 此前不区分，一条紧跟在托管组后面的 `Sitemap:` 会被吞进托管块，
+      // 站长自己的 sitemap 声明被算成 CDN 注入。
+      if (!GROUP_DIRECTIVES.has(d.key)) break;
       if (d.key === "content-signal") { groupHasContentSignal = true; hasContentSignal = true; }
-      else if (d.key === "disallow") { sawRule = true; if (d.value !== "/") onlyBlanketDisallow = false; }
-      else if (d.key === "allow") { sawRule = true; if (d.value !== "/") onlyBlanketDisallow = false; }
+      // `/`、`/*`、`*` 三种写法在 robots 语义里都是「整站」（robots-parse.mjs 的
+      // accessState 已按此处理），这里必须用同一口径——否则托管块若写成 `Disallow: /*`，
+      // 切分会在此提前停止，CDN 注入的规则被算到站长头上，正是头注释里的红线。
+      else if (d.key === "disallow") { sawRule = true; if (!isBlanketPath(d.value)) onlyBlanketDisallow = false; }
+      else if (d.key === "allow") { sawRule = true; if (!isBlanketPath(d.value)) onlyBlanketDisallow = false; }
       cursor += 1;
     }
     void groupStart;

@@ -1,4 +1,5 @@
 import { checkResult } from "../types.mjs";
+import { stripNoise } from "./html-text.mjs";
 import { outcomeToState, OK } from "./fetch-outcome.mjs";
 
 const PASS_AT = 500;
@@ -11,11 +12,13 @@ const WARN_AT = 200;
  * 顺序很重要：若先去标签，脚本里的字符串会被当成正文，一个大 JSON 就能让空壳站看起来内容充足。
  */
 export function visibleTextLength(html) {
-  return String(html ?? "")
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+  // 与 html-meta / structured-data 共用同一份去噪（stripNoise），不再各留一份拷贝：
+  // 此前这里不剥 svg/template，于是 template 里的正文、几十个内联图标的 <title>
+  // 会被算成「静态可读字数」判 pass，而 html-meta 对同一页面判「无 h1」——
+  // 同一份报告自相矛盾，正是 html-text.mjs 抽出 stripNoise 要防的漂移。
+  // noscript 是本检查独有的口径（不执行 JS 时它其实可见，是否计入是另一次决策），保持不变。
+  return stripNoise(html)
     .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
-    .replace(/<!--[\s\S]*?-->/g, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/&[a-z#0-9]+;/gi, " ")
     .replace(/\s+/g, " ")

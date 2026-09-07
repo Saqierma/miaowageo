@@ -53,3 +53,24 @@ test("四种失败原因产出四段不同的文案，且都不带 verdict", () 
   });
   assert.equal(new Set(texts).size, 4, "四种原因必须呈现四段不同的文案，不得坍缩成一句「本次未测到」");
 });
+
+// ---------------------------------------------------------------------------
+// 代码审查（2026-09）：与 html-meta 共用 stripNoise，口径不再漂移
+// ---------------------------------------------------------------------------
+
+import { visibleTextLength as vtl } from "../src/checks/static-readability.mjs";
+import { extractH1s as h1sOf } from "../src/checks/html-meta.mjs";
+
+test("**template 里的正文与内联 svg 的 <title> 不计入静态可读字数**——与 html-meta 同口径", () => {
+  // 此前：正文全在 <template> 里 + 40 个图标 <title> 的 CSR 页，readability 判 pass
+  // 「静态可读 678 字」，而同一页面 html-meta 判「无 h1」——同一份报告自相矛盾。
+  const icons = Array.from({ length: 40 }, () => `<svg><title>图标</title><path d="M0 0L1 1"/></svg>`).join("");
+  const body = "正文".repeat(300);
+  const html = `<html><body><template><h1>标题</h1><p>${body}</p></template>${icons}</body></html>`;
+  assert.ok(vtl(html) < 200, `template/svg 里的文字被算成了静态可读内容：${vtl(html)}`);
+  assert.deepEqual(h1sOf(html), [], "两个检查对 template 内容的口径必须一致");
+});
+
+test("noscript 仍按本检查独有的口径剥掉（这次不改这条决策）", () => {
+  assert.equal(vtl(`<html><body><noscript>${"x".repeat(600)}</noscript></body></html>`), 0);
+});

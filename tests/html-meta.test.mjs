@@ -316,3 +316,107 @@ test("一个「什么都没配」的站点，这八项会真的暴露问题", ()
   const bad = rs.filter((r) => r.verdict === "fail" || r.verdict === "warn");
   assert.ok(bad.length >= 6, `裸页面应暴露至少 6 项问题，实测 ${bad.length}：${rs.map((r) => r.id + "=" + r.verdict).join(", ")}`);
 });
+
+// ---------------------------------------------------------------------------
+// issue #3「HTML 正则解析」的核实（2026-09）
+//
+// 提交者举了三个会误判的例子，实测两个不成立、一个没举对：
+//   属性里含 `>`  —— 不成立：content 捕获组是 [^"']*，`>` 落在里面不影响
+//   嵌套注释      —— 不成立：HTML 规范里注释不嵌套，在第一个 --> 结束，正则行为正确
+//   畸形 HTML     —— 成立，但真正会产出**错误结论**的是下面这个：
+//     <svg> 自带 <title>/<desc>，内联图标的 <title>购物车图标</title> 会被当成页面标题，
+//     一个根本没有 <title> 的页面被报成 pass。
+//
+// 下面前两条把「不成立」也钉住——它们守的是「不要因为一条 issue 就改掉本来正确的行为」。
+// ---------------------------------------------------------------------------
+
+test("issue #3 核实：属性值里的 > 不影响 meta 读取（提交者的例子不成立）", () => {
+  const html = `<html><head><meta name="description" content="A > B 的对比：性价比更高，适合小批量采购的外贸客户使用"></head></html>`;
+  assert.equal(extractMetaByName(html, "description"), "A > B 的对比：性价比更高，适合小批量采购的外贸客户使用");
+});
+
+test("issue #3 核实：注释不嵌套，第一个 --> 即结束（提交者的例子不成立，且与规范一致）", () => {
+  // 规范：注释在第一个 --> 处结束。所以「B」是可见的，剥离后必须保留；
+  // 「内」在注释里，必须消失。断言语义而不是写死拼接结果——注释被替换成
+  // 一个空格是去噪的实现细节，不是这条测试要守的东西。
+  const html = `<html><body><h1>A<!-- 外 <!-- 内 -->B</h1></body></html>`;
+  const [h1] = extractH1s(html);
+  assert.match(h1, /^A\s?B$/, "第一个 --> 之后的 B 必须可见");
+  assert.doesNotMatch(h1, /内|外/, "注释内容漏出来了");
+});
+
+test("**SVG 图标的 <title> 不得被当成页面标题**（issue #3 里唯一会产出错误结论的一条）", () => {
+  // 页面没有真 <title>，只有内联 SVG 图标自带的 <title>——此前被报成有标题。
+  const noTitle = `<html><head></head><body><svg viewBox="0 0 1 1"><title>购物车图标</title></svg><p>正文</p></body></html>`;
+  assert.equal(extractTitle(noTitle), null, "SVG 的 <title> 被当成了页面标题");
+  assert.equal(byId(run(noTitle), "metadata.title").verdict, "fail", "缺 title 的页面被报成了有 title");
+
+  // 真 title 与 SVG title 并存时，读到的必须是真的那个。
+  const both = `<html><head><title>真标题</title></head><body><svg><title>图标</title></svg></body></html>`;
+  assert.equal(extractTitle(both), "真标题");
+});
+
+test("**<template> 里的 <h1> 不进 h1 计数**——浏览器不渲染 template 内容", () => {
+  const html = `<html><body><template><h1>模板里的标题</h1></template><h1>真标题</h1></body></html>`;
+  assert.deepEqual(extractH1s(html), ["真标题"]);
+  assert.equal(byId(run(html), "metadata.h1").verdict, "pass", "template 里的 h1 让唯一 h1 被误判成多个");
+});
+
+test("**未闭合的 <svg> 不得吞掉后面的页面内容**——只剥闭合的块", () => {
+  // 漏写 </svg> 是常见手误。script 那套「剥到文档末尾」的规则在这里会把整页 meta 吞掉。
+  const html = `<html><head><title>真标题</title></head><body><svg><path d="M0 0"><p>正文</p><h1>真标题</h1></body></html>`;
+  assert.equal(extractTitle(html), "真标题");
+  assert.deepEqual(extractH1s(html), ["真标题"]);
+});
+
+test("**<svg-icon> 这类 Web Component 不是 <svg>，不得触发剥离**", () => {
+  // 正则要求 <svg 后紧跟空白或 >。第一版测试用的是 class="svg-icon"——那里的 svg
+  // 前面没有 `<`，宽松正则也匹配不上，变异（去掉 [\s>]）在它上面行为等价，
+  // 等于没测。真正能区分的是自定义元素 <svg-icon>（Vue / Angular / Lit 里极常见）：
+  // 宽松正则会从 <svg-icon 一路吞到页面后面某个真 </svg>，把中间的 <h1> 一起吃掉。
+  const html = [
+    `<html><head><title>真标题</title></head><body>`,
+    `<svg-icon name="cart"></svg-icon>`,
+    `<h1>真标题</h1>`,
+    `<svg viewBox="0 0 1 1"><title>图标</title></svg>`,
+    `</body></html>`,
+  ].join("");
+  assert.equal(extractTitle(html), "真标题");
+  assert.deepEqual(extractH1s(html), ["真标题"], "<svg-icon> 被当成 <svg> 起点，把 h1 吞掉了");
+});
+
+// ---------------------------------------------------------------------------
+// 代码审查（2026-09，对 issue #3 修复的审查）补上的防线
+// ---------------------------------------------------------------------------
+
+test("**未闭合的 <svg> 不得一路吞到页脚另一个图标的 </svg>**", () => {
+  // 审查发现：非贪婪只保证「不剥到末尾」，不保证「不跨越到下一个 svg」。
+  // 导航栏 logo 漏写 </svg>、页脚有个正常图标——这在真实站点里比「整页没有第二个 svg」常见得多。
+  const html = [
+    `<html><head><title>T</title></head><body>`,
+    `<svg viewBox="0 0 1 1"><path d="M0 0"/>`,            // 漏写 </svg>
+    `<h1>真H1</h1><p>正文</p><img src="a.png" alt="x">`,
+    `<svg class="icon"><title>图标</title></svg>`,          // 页脚正常闭合
+    `</body></html>`,
+  ].join("");
+  assert.deepEqual(extractH1s(html), ["真H1"], "h1 被吞进了两个 svg 之间的区间");
+  assert.equal(imgAltCoverage(html).total, 1, "img 被吞进了两个 svg 之间的区间");
+});
+
+test("**</svg > 这种带空白的结束标签也要认**——HTML 允许标签名与 > 之间有空白", () => {
+  const html = `<html><head></head><body><svg><title>购物车</title></svg ></body></html>`;
+  assert.equal(extractTitle(html), null, "</svg > 没被认出，svg 的 title 又冒充了页面标题");
+  const nl = `<html><head></head><body><svg><title>购物车</title></svg\n></body></html>`;
+  assert.equal(extractTitle(nl), null);
+});
+
+test("**声明式 Shadow DOM 的 <template shadowrootmode> 是渲染的，不得剥掉**", () => {
+  // MDN：带 shadowrootmode 的 template 由解析器立即变成 ShadowRoot 并渲染。
+  const html = `<html><body><div><template shadowrootmode="open"><h1>产品名</h1></template></div></body></html>`;
+  assert.deepEqual(extractH1s(html), ["产品名"]);
+  // 旧式 shadowroot="open"（Chrome 90–110）同样是渲染的。
+  const legacy = `<html><body><div><template shadowroot="open"><h1>产品名</h1></template></div></body></html>`;
+  assert.deepEqual(extractH1s(legacy), ["产品名"]);
+  // 普通 template 仍然不算。
+  assert.deepEqual(extractH1s(`<html><body><template><h1>模板</h1></template></body></html>`), []);
+});

@@ -190,3 +190,26 @@ test("认出托管块时，措辞要点明「这不是你写的」", () => {
   assert.match(item.limitation, /不是你写的/);
   assert.match(item.limitation, /控制台/, "要告诉他去哪儿改");
 });
+
+test("**托管块写 Disallow: /* 也要认成整站**——与 accessState 同口径（代码审查发现）", () => {
+  // 此前用原始字符串 !== "/" 判整站，`/*` 让 GPTBot 组被判为非托管形态，切分提前停止，
+  // 后面本可识别的 CCBot 托管组一并算成源站——正是头注释里的红线方向。
+  const body = [
+    "# Content Signals Policy",
+    "User-agent: *",
+    "Content-Signal: search=yes,ai-train=no",
+    "Allow: /",
+    "",
+    "User-agent: GPTBot",
+    "Disallow: /*",
+    "",
+    "User-agent: CCBot",
+    "Disallow: /",
+    "",
+    "Sitemap: https://example.com/sitemap.xml",
+    "",
+  ].join("\n");
+  const p = splitProvenance(body);
+  assert.deepEqual(p.managedAgents.sort(), ["ccbot", "gptbot"], "Disallow: /* 的组没被认成托管块");
+  assert.ok(!body.split("\n").slice(0, p.managedLineCount).join("\n").includes("Sitemap:"), "源站的 Sitemap 行被吃进托管块");
+});

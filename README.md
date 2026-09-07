@@ -469,9 +469,9 @@ WAF 规则匹配的是 User-Agent，保真度不受影响；而对方查日志�
 三态模型、Googlebot 对照探针、训练型与检索型爬虫的分层（**包括我们自己在这上面
 栽过的那一跤**）、变异测试纪律，以及三阶段各自独立的并发池。
 
-### 403 个测试，每一条防线都被变异验证过
+### 441 个测试，每一条防线都被变异验证过
 
-`npm test` 跑 403 个测试，每次 push 与 PR 由 GitHub Actions 在 Node 22 与 24 上各跑一遍（上面那个徽章就是它）。更要紧的是：**每一条重要防线都做过变异测试**——把防御代码删掉，确认真的有测试变红。
+`npm test` 跑 441 个测试，每次 push 与 PR 由 GitHub Actions 在 Node 22 与 24 上各跑一遍（上面那个徽章就是它）。更要紧的是：**每一条重要防线都做过变异测试**——把防御代码删掉，确认真的有测试变红。
 
 一个不会变红的测试，是比没有测试更危险的东西：它让人以为那里被守着。
 
@@ -479,7 +479,7 @@ WAF 规则匹配的是 User-Agent，保真度不受影响；而对方查日志�
 git clone https://github.com/Saqierma/miaowageo.git
 cd miaowageo
 npm install        # 只装 lighthouse
-npm test           # 403 个测试
+npm test           # 441 个测试
 ```
 
 需要 Node.js >= 22.13.0。部署见 [`deploy/README.md`](deploy/README.md)。
@@ -1039,9 +1039,9 @@ The source comments are in Chinese. [**ARCHITECTURE.md**](ARCHITECTURE.md) carri
 the Googlebot control probe, training-vs-retrieval crawler tiers (**including the bug we shipped
 on our own headline principle**), the mutation-testing discipline, and the three concurrency pools.
 
-### 403 tests, and every defence has been mutation-verified
+### 441 tests, and every defence has been mutation-verified
 
-`npm test` runs 403 tests, and GitHub Actions runs them on Node 22 and 24 on every push and pull request (that is the badge at the top). More importantly, **every significant defence has been mutation-tested** — the defensive code is deleted and we confirm a test actually turns red.
+`npm test` runs 441 tests, and GitHub Actions runs them on Node 22 and 24 on every push and pull request (that is the badge at the top). More importantly, **every significant defence has been mutation-tested** — the defensive code is deleted and we confirm a test actually turns red.
 
 A test that cannot turn red is more dangerous than no test at all: it makes people believe something is guarded.
 
@@ -1049,7 +1049,7 @@ A test that cannot turn red is more dangerous than no test at all: it makes peop
 git clone https://github.com/Saqierma/miaowageo.git
 cd miaowageo
 npm install        # installs lighthouse only
-npm test           # 403 tests
+npm test           # 441 tests
 ```
 
 Requires Node.js >= 22.13.0. See [`deploy/README.md`](deploy/README.md).

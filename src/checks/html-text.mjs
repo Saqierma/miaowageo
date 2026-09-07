@@ -19,7 +19,19 @@ export function stripNoise(html) {
   return String(html ?? "")
     .replace(/<script[\s\S]*?(?:<\/script>|$)/gi, " ")
     .replace(/<style[\s\S]*?(?:<\/style>|$)/gi, " ")
-    .replace(/<!--[\s\S]*?(?:-->|$)/g, " ");
+    .replace(/<!--[\s\S]*?(?:-->|$)/g, " ")
+    // <svg> 自带 <title>/<desc>：内联图标的 <title>购物车图标</title> 会冒充页面标题，
+    // 让一个没有 <title> 的页面被报成 pass（issue #3 里唯一会产出错误结论的一条）。
+    // <template> 的内容浏览器不渲染，里面的 <h1> 不该进计数——**但声明式 Shadow DOM**
+    // （template shadowrootmode / 旧式 shadowroot）会被解析器立即渲染，负向前瞻把它排除。
+    //
+    // 三条与 script/style 不同的规则，都是为了不吞掉真实内容：
+    //   1. 只剥闭合的块，不剥到文档末尾——漏写 </svg> 是常见手误，剥到末尾会吞掉整页 meta；
+    //   2. 块内不允许再出现同名开始标签（tempered 模式）——否则一个未闭合的 logo 会一路
+    //      吞到页脚某个正常图标的 </svg>，把中间的 h1/p/img 全部删掉；代价是嵌套同名
+    //      标签只剥到内层结束、外层尾部漏出，极少见，接受；
+    //   3. 结束标签允许 </svg >（标签名与 > 之间可有空白），HTML 允许这么写。
+    .replace(/<(svg|template)(?![^>]*\bshadowroot)[\s>](?:(?!<\1[\s>])[\s\S])*?<\/\1\s*>/gi, " ");
 }
 
 // ---------------------------------------------------------------------------

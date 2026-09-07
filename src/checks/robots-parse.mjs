@@ -3,7 +3,7 @@
  * 这样它可以被独立测试，也不会把 checkResult / fetch-outcome 的契约
  * 泄漏进「这份 robots.txt 到底允许什么」这个纯粹的问题里。
  *
- * 刻意不复用现成的 robots 解析库：
+ * 刻意不复用 `汇报机器人/src/report-robot-core.mjs` 的 robotsAllowsPath()：
  * 那个函数返回布尔值，而设计文档第五节的 partial 呈现需要「命中哪一组、
  * 那一组放行了哪些路径」。同时它有三处已知缺陷（无通配符、agent 子串误匹配、
  * 多组规则被 flatten），修起来等于重写。原函数保持不动，报告 Worker 仍在用。
@@ -122,6 +122,80 @@ function wildcardMatch(pattern, pathname) {
 }
 
 /**
+ * RFC 3986 的非保留字符：只有这些字符的百分号编码可以安全地解开。
+ * `/`、`?`、`:` 这类保留字符**必须保持编码**——`%2F` 和 `/` 在路径里是两个东西。
+ */
+const UNRESERVED = /^[A-Za-z0-9\-._~]$/;
+
+/**
+ * 字面量出现时**必须**编码的 ASCII：控制字符、空格、以及 WHATWG URL 路径编码集里的
+ * `" < > ` { } ^`。对照的是 `new URL().pathname` 的实际输出——调用方传进来的
+ * pathname 全部来自它，这些字符在那一侧永远是 %XX 形态；规则一侧若留成字面量，
+ * `Disallow: /my page/` 就拦不住 `/my%20page/`，与 issue #4 要修的三种漏判同类。
+ * `|` 与 `\\` 不在此列：WHATWG 在路径里保留 `|` 为字面量，`\\` 在特殊 scheme 下
+ * 会被当成 `/`，两者都不会以字面量形态出现在 pathname 里。
+ */
+const MUST_ENCODE_ASCII = /[\x00-\x20\x7F"<>`{}^]/;
+
+/** 无需归一化的快速判定：多数规则与路径既无 % 也无非 ASCII，直接原样返回。 */
+const NEEDS_NORMALIZATION = /[%\x00-\x20\x7F"<>`{}^\u0080-\uFFFF]/;
+
+/** TextEncoder 无状态，提到模块级；本文件仍然零 import（它是全局对象）。 */
+const UTF8 = new TextEncoder();
+
+const hex2 = (b) => `%${b.toString(16).toUpperCase().padStart(2, "0")}`;
+
+/**
+ * 按 RFC 9309 §2.2.2 把路径归一化到可比较的形态（issue #4）。
+ *
+ * 此前规则与路径做的是**原始字符串比较**，于是：
+ *   Disallow: /%E7%A7%81%E5%AF%86/   拦不住   /私密/a
+ *   Disallow: /私密/                 拦不住   /%E7%A7%81%E5%AF%86/a
+ *   Disallow: /a%2Fb                 拦不住   /a%2fb
+ * 三种形态实测全部漏判——而 robots 准入是这个产品的核心判定。
+ *
+ * 规范给的表（§2.2.2）落成四条规则，**不是笼统地两边 decode**：
+ *   1. `%XX` 解出来是非保留 ASCII → 还原成字面量（`%62` → `b`）
+ *   2. 其余 `%XX` → 保持编码，十六进制统一大写（`%2f` → `%2F`）
+ *   3. 字面量的非 ASCII 字符 → 按 UTF-8 逐字节百分号编码（`私` → `%E7%A7%81`）；
+ *      字面量的 MUST_ENCODE_ASCII → 同样编码（空格 → `%20`）
+ *   4. 其余 ASCII（含 `/`、`*`、`$`）原样保留——`*` 与 `$` 是规则的元字符，
+ *      归一化两侧都不碰它们，语义不变
+ *
+ * 具体度（moreSpecific）按归一化后的字符串长度比较：这与 Google 的参考实现
+ * robotstxt 一致（priority = 转义后 pattern 的长度），§2.2.2 的比较发生在编码之后，
+ * 「八位组最多」指的就是编码后的串。
+ */
+export function normalizeRobotsPath(path) {
+  const s = String(path ?? "");
+  if (!NEEDS_NORMALIZATION.test(s)) return s;
+  let out = "";
+  for (let i = 0; i < s.length; i += 1) {
+    const ch = s[i];
+    if (ch === "%" && /^[0-9A-Fa-f]{2}$/.test(s.slice(i + 1, i + 3))) {
+      const hex = s.slice(i + 1, i + 3);
+      const decoded = String.fromCharCode(Number.parseInt(hex, 16));
+      // UNRESERVED 只含 ASCII，≥0x80 的字节天然落到「保持编码」这一支。
+      out += UNRESERVED.test(decoded) ? decoded : `%${hex.toUpperCase()}`;
+      i += 2;
+      continue;
+    }
+    const cp = s.codePointAt(i);
+    if (cp > 0x7f) {
+      for (const b of UTF8.encode(String.fromCodePoint(cp))) out += hex2(b);
+      if (cp > 0xffff) i += 1; // 代理对占两个 UTF-16 单元
+      continue;
+    }
+    if (MUST_ENCODE_ASCII.test(ch)) {
+      out += hex2(cp);
+      continue;
+    }
+    out += ch;
+  }
+  return out;
+}
+
+/**
  * 判断一条 robots 规则（`rule.path` 原始写法）是否命中某个 pathname。
  *
  * 两个必须支持的构造，都是真实世界的常见写法：
@@ -153,6 +227,30 @@ function moreSpecific(left, right) {
   return left.type === "allow" ? -1 : 1;
 }
 
+/**
+ * 规则的归一化形态，按 group 对象缓存。
+ *
+ * 归一化只取决于 group，却被放在按 pathname 调用的热路径上：一次审计里同一个
+ * group 会被 pathAllowed 调用约 34 次（14 个爬虫 × accessState 的 2 次，加编排层
+ * 的 6 次）。不缓存就是把同一批规则逐字符重扫 34 遍。
+ *
+ * **不在 groupFor 里就地归一化**：group.allow 会原样透传进 accessState 的 allow，
+ * 再进 robots.mjs 的 formatAllowList 写进面向客户的报告——那里必须是站长自己写的
+ * 原文（`/私密/`），不能变成 `/%E7%A7%81%E5%AF%86/`。比较用形态与展示用形态分开。
+ */
+const NORMALIZED_RULES = new WeakMap();
+function normalizedRules(group) {
+  let rules = NORMALIZED_RULES.get(group);
+  if (!rules) {
+    rules = [
+      ...group.allow.map((path) => ({ type: "allow", path: normalizeRobotsPath(path) })),
+      ...group.disallow.map((path) => ({ type: "disallow", path: normalizeRobotsPath(path) })),
+    ];
+    NORMALIZED_RULES.set(group, rules);
+  }
+  return rules;
+}
+
 /** 某个路径在该规则组下是否被允许抓取。无适用规则时默认允许。 */
 export function pathAllowed(group, pathname) {
   if (typeof pathname !== "string") {
@@ -162,10 +260,12 @@ export function pathAllowed(group, pathname) {
     throw new TypeError(`pathAllowed 的 pathname 必须是字符串，收到：${typeof pathname}`);
   }
   if (!group) return true;
-  const rules = [
-    ...group.allow.map((path) => ({ type: "allow", path })),
-    ...group.disallow.map((path) => ({ type: "disallow", path })),
-  ].filter((rule) => ruleMatches(rule.path, pathname));
+  // **两侧都归一化后再比较**（issue #4）。规则在这里就归一化，而不是只在
+  // ruleMatches 里——因为 moreSpecific 按 path.length 排优先级，规范说的是
+  // 归一化后的八位组长度：`/私密/` 与 `/%E7%A7%81%E5%AF%86/` 是同一条规则，
+  // 不该因为写法不同而具体度不同。
+  const target = normalizeRobotsPath(pathname);
+  const rules = normalizedRules(group).filter((rule) => ruleMatches(rule.path, target));
   if (!rules.length) return true;
   rules.sort(moreSpecific);
   return rules[0].type === "allow";
@@ -186,7 +286,12 @@ const REPRESENTATIVE_CONTENT_PATH = "/__site-audit-representative-content__";
  * 「整站不允许抓取」，不能因为技术上存在 Allow 行就报成白名单或部分开放。
  */
 function isContentAllowRule(path) {
-  return path !== "/robots.txt" && path !== "/$";
+  // **先归一化再比较**，与 pathAllowed 同口径。否则 `Allow: /robots%2Etxt`
+  // （%2E 归一化后就是 `.`）在 pathAllowed 眼里只放行了 robots.txt、算不上内容救援，
+  // 而这里按原始写法看到的是另一个字符串、判成内容路径——整站封禁被报成
+  // 「白名单放行，这是有意配置」。`Allow: /%24`（→ `/$`）同理。
+  const p = normalizeRobotsPath(path);
+  return p !== "/robots.txt" && p !== "/$";
 }
 
 /**
