@@ -332,7 +332,7 @@ Akamai、阿里云 WAF 这类**有固定后台、菜单路径明确**的产品�
 
 ---
 
-## 五、三条我们不肯让步的原则
+## 五、四条我们不肯让步的原则
 
 一个检测工具最容易做的事，是把复杂的现实压成一个好看的数字。我们拒绝这么做。
 
@@ -486,7 +486,7 @@ npm test           # 441 个测试
 
 > **关于代码注释里的「设计文档」。** 源码与测试里有几十处引用「设计文档第 N 节」，
 > 那是本项目的内部规格文档，没有随仓库公开。但你不需要它——被引用的每一条规则，
-> 它的**理由**都写在紧挨着的注释里，那才是重要的部分。上面第五节的三条原则，
+> 它的**理由**都写在紧挨着的注释里，那才是重要的部分。上面第五节的四条原则，
 > 就是其中最要紧的几条的完整表述。
 
 ---
@@ -896,7 +896,7 @@ Reasoning in [`cases/README.md`](cases/README.md#关于匿名).
 
 ---
 
-## 5. Three principles we will not trade away
+## 5. Four principles we will not trade away
 
 The easiest thing an audit tool can do is compress messy reality into one attractive number. We refuse.
 
